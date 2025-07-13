@@ -29,28 +29,49 @@ export default function MotivationSection() {
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-red-500 mt-1 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-red-800">의회 권한 무시</p>
-                    <p className="text-gray-700 text-sm">295회 군의회 조건부 부결 무시</p>
-                  </div>
+              <div className="space-y-6">
+                <div className="text-center mb-4">
+                  <h5 className="text-xl font-bold text-red-800 mb-2">🛑 이것은 민주주의입니까, 독재입니까?</h5>
                 </div>
                 
-                <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-red-500 mt-1 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-red-800">지방자치법 위반</p>
-                    <p className="text-gray-700 text-sm">제55조 사전 공고 절차 무시</p>
+                <div className="space-y-4">
+                  <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                    <div className="flex items-start">
+                      <div className="bg-red-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1 flex-shrink-0">
+                        <span className="text-red-600 font-bold text-sm">1</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-red-800 mb-2">의회, 사업에 강한 반대 의견 표명</p>
+                        <p className="text-gray-700 text-sm">295회 군의회에서 용역비 집행을 사업추진의 기본적인 타당성 확보 이후로 조건부 부결</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-red-500 mt-1 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-red-800">독단적 행정</p>
-                    <p className="text-gray-700 text-sm">군민 의견 수렴 절차 형식화</p>
+                  
+                  <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                    <div className="flex items-start">
+                      <div className="bg-red-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1 flex-shrink-0">
+                        <span className="text-red-600 font-bold text-sm">2</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-red-800 mb-2">군수, 독단 강행</p>
+                        <p className="text-gray-700 text-sm mb-2">의회의 반대 의견을 무릅쓰고 집행부 pool 예산을 사용하여 사업 강행</p>
+                        <p className="text-gray-700 text-sm">지방자치법 제 55조를 위반하여 안건을 군의회에 사전 제출하지 않음</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                    <div className="flex items-start">
+                      <div className="bg-red-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1 flex-shrink-0">
+                        <span className="text-red-600 font-bold text-sm">3</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-red-800 mb-2">군민 대표권 훼손</p>
+                        <p className="text-gray-700 text-sm mb-2">형식적인 설문조사, 공청회 진행을 통한 민주적 절차 무시 및 의회 권한 침해.</p>
+                        <p className="text-gray-700 text-sm mb-2">지방자치법 제 55조를 위반에 대한 군민과 군의회에 사과하지 않고 오히려 정당성 주장</p>
+                        <p className="text-gray-700 text-sm font-semibold text-red-700">향후 이런 독재적 행정이 반복될 수 있음.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
