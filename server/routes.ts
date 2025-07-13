@@ -1,0 +1,206 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import session from "express-session";
+import { storage } from "./storage";
+import { insertUserSchema, insertPolicySchema, insertSignatureSchema } from "@shared/schema";
+import { z } from "zod";
+
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Session configuration
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'default-secret-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  // Authentication middleware
+  const requireAuth = (req: any, res: any, next: any) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
+
+  // Auth routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { name, phone } = insertUserSchema.parse(req.body);
+      
+      // Check if user exists
+      let user = await storage.getUserByPhone(phone);
+      
+      if (!user) {
+        // Create new user
+        user = await storage.createUser({ name, phone });
+      } else {
+        // Update name if different
+        if (user.name !== name) {
+          // In a real app, you might want to handle name updates differently
+          console.log(`Name mismatch for ${phone}: ${user.name} vs ${name}`);
+        }
+      }
+      
+      req.session.userId = user.id;
+      res.json({ user: { id: user.id, name: user.name, phone: user.phone } });
+    } catch (error) {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Could not log out" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    const user = await storage.getUser(req.session.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json({ user: { id: user.id, name: user.name, phone: user.phone } });
+  });
+
+  // Signature routes
+  app.post("/api/signatures", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      
+      // Check if user already signed
+      const existingSignature = await storage.getSignatureByUserId(userId);
+      if (existingSignature) {
+        return res.status(400).json({ message: "Already signed" });
+      }
+      
+      const signature = await storage.createSignature({ userId });
+      res.json({ signature });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create signature" });
+    }
+  });
+
+  app.get("/api/signatures/check", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const signature = await storage.getSignatureByUserId(userId);
+      res.json({ hasSigned: !!signature });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check signature status" });
+    }
+  });
+
+  // Policy routes
+  app.get("/api/policies", async (req, res) => {
+    try {
+      const category = req.query.category as string;
+      const policies = await storage.getPolicies(category);
+      res.json({ policies });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch policies" });
+    }
+  });
+
+  app.post("/api/policies", requireAuth, async (req, res) => {
+    try {
+      const authorId = req.session.userId!;
+      const policyData = { ...req.body, authorId };
+      const validatedData = insertPolicySchema.parse(policyData);
+      
+      const policy = await storage.createPolicy(validatedData);
+      res.json({ policy });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid policy data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create policy" });
+    }
+  });
+
+  app.post("/api/policies/:id/support", requireAuth, async (req, res) => {
+    try {
+      const policyId = parseInt(req.params.id);
+      const userId = req.session.userId!;
+      
+      if (isNaN(policyId)) {
+        return res.status(400).json({ message: "Invalid policy ID" });
+      }
+      
+      const success = await storage.supportPolicy(policyId, userId);
+      if (!success) {
+        return res.status(400).json({ message: "Already supported this policy" });
+      }
+      
+      res.json({ message: "Policy supported successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to support policy" });
+    }
+  });
+
+  app.get("/api/policies/:id/support-status", requireAuth, async (req, res) => {
+    try {
+      const policyId = parseInt(req.params.id);
+      const userId = req.session.userId!;
+      
+      if (isNaN(policyId)) {
+        return res.status(400).json({ message: "Invalid policy ID" });
+      }
+      
+      const support = await storage.getUserPolicySupport(policyId, userId);
+      res.json({ hasSupported: !!support });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check support status" });
+    }
+  });
+
+  // Notice routes
+  app.get("/api/notices", async (req, res) => {
+    try {
+      const notices = await storage.getNotices();
+      res.json({ notices });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notices" });
+    }
+  });
+
+  // Resource routes
+  app.get("/api/resources", async (req, res) => {
+    try {
+      const resources = await storage.getResources();
+      res.json({ resources });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch resources" });
+    }
+  });
+
+  // Statistics routes
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const stats = await storage.getStats();
+      res.json({ stats });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch statistics" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
