@@ -12,10 +12,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, LogOut, Shield, FileText, Calendar, Users } from "lucide-react";
+import { Trash2, Edit, Plus, LogOut, Shield, FileText, Calendar, Users, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import AdminLoginModal from "@/components/admin-login-modal";
+import { useWebContent, useCreateWebContent, useUpdateWebContent, useDeleteWebContent } from "@/hooks/useWebContent";
 
 export default function AdminPage() {
   const { admin, isAuthenticated, logout } = useAdminAuth();
@@ -43,6 +44,48 @@ export default function AdminPage() {
   const { data: policies = [] } = useQuery({
     queryKey: ['/api/policies'],
     enabled: isAuthenticated,
+  });
+
+  const { data: webContent = [] } = useWebContent();
+  
+  const createWebContentMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('/api/admin/web-content', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/web-content'] });
+      setContentForm({ section: "", key: "", title: "", content: "", metadata: "{}" });
+      toast({ title: "웹 콘텐츠가 추가되었습니다." });
+    },
+  });
+
+  const updateWebContentMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      return await apiRequest(`/api/admin/web-content/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/web-content'] });
+      setEditingContent(null);
+      toast({ title: "웹 콘텐츠가 수정되었습니다." });
+    },
+  });
+
+  const deleteWebContentMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest(`/api/admin/web-content/${id}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/web-content'] });
+      toast({ title: "웹 콘텐츠가 삭제되었습니다." });
+    },
   });
 
   const { data: stats } = useQuery({
@@ -156,6 +199,16 @@ export default function AdminPage() {
     },
   });
 
+  // Web Content Management
+  const [contentForm, setContentForm] = useState({ 
+    section: "", 
+    key: "", 
+    title: "", 
+    content: "",
+    metadata: "{}"
+  });
+  const [editingContent, setEditingContent] = useState<any>(null);
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -266,12 +319,128 @@ export default function AdminPage() {
         </div>
 
         {/* Management Tabs */}
-        <Tabs defaultValue="notices" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="content">웹 콘텐츠 관리</TabsTrigger>
             <TabsTrigger value="notices">공지사항 관리</TabsTrigger>
             <TabsTrigger value="resources">자료 관리</TabsTrigger>
             <TabsTrigger value="policies">정책 관리</TabsTrigger>
           </TabsList>
+
+          {/* Web Content Management */}
+          <TabsContent value="content" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>웹 콘텐츠 관리</CardTitle>
+                <CardDescription>
+                  웹사이트의 모든 텍스트 콘텐츠를 관리합니다. 섹션별로 구분되어 있으며 실시간으로 웹사이트에 반영됩니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Add Content Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>새 콘텐츠 추가</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>섹션</Label>
+                        <Select 
+                          value={contentForm.section} 
+                          onValueChange={(value) => setContentForm({ ...contentForm, section: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="섹션 선택" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hero">메인 히어로</SelectItem>
+                            <SelectItem value="motivation">반대 이유</SelectItem>
+                            <SelectItem value="footer">푸터</SelectItem>
+                            <SelectItem value="policies">정책 섹션</SelectItem>
+                            <SelectItem value="resources">자료 섹션</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>키</Label>
+                        <Input
+                          placeholder="고유 식별자 (예: main_title)"
+                          value={contentForm.key}
+                          onChange={(e) => setContentForm({ ...contentForm, key: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>제목 (선택사항)</Label>
+                      <Input
+                        placeholder="콘텐츠 제목"
+                        value={contentForm.title}
+                        onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>내용</Label>
+                      <Textarea
+                        placeholder="콘텐츠 내용을 입력하세요"
+                        value={contentForm.content}
+                        onChange={(e) => setContentForm({ ...contentForm, content: e.target.value })}
+                        rows={4}
+                      />
+                    </div>
+                    <Button 
+                      onClick={() => createWebContentMutation.mutate(contentForm)}
+                      disabled={createWebContentMutation.isPending || !contentForm.section || !contentForm.key || !contentForm.content}
+                      className="w-full"
+                    >
+                      {createWebContentMutation.isPending ? "추가 중..." : "콘텐츠 추가"}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Content List */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">등록된 콘텐츠</h3>
+                  {webContent?.content?.map((item: any) => (
+                    <Card key={item.id}>
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-2 flex-1">
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">{item.section}</Badge>
+                              <Badge variant="secondary">{item.key}</Badge>
+                            </div>
+                            {item.title && <h4 className="font-medium">{item.title}</h4>}
+                            <p className="text-sm text-gray-600 line-clamp-2">{item.content}</p>
+                            <p className="text-xs text-gray-400">
+                              등록: {format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingContent(item)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deleteWebContentMutation.mutate(item.id)}
+                              disabled={deleteWebContentMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Notices Management */}
           <TabsContent value="notices" className="space-y-6">
@@ -685,6 +854,76 @@ export default function AdminPage() {
                 className="w-full"
               >
                 {updateResourceMutation.isPending ? "수정 중..." : "수정"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Web Content Modal */}
+      {editingContent && (
+        <Dialog open={!!editingContent} onOpenChange={() => setEditingContent(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>웹 콘텐츠 수정</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>섹션</Label>
+                  <Select 
+                    value={editingContent.section} 
+                    onValueChange={(value) => setEditingContent({ ...editingContent, section: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hero">메인 히어로</SelectItem>
+                      <SelectItem value="motivation">반대 이유</SelectItem>
+                      <SelectItem value="footer">푸터</SelectItem>
+                      <SelectItem value="policies">정책 섹션</SelectItem>
+                      <SelectItem value="resources">자료 섹션</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>키</Label>
+                  <Input
+                    value={editingContent.key}
+                    onChange={(e) => setEditingContent({ ...editingContent, key: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>제목 (선택사항)</Label>
+                <Input
+                  value={editingContent.title || ""}
+                  onChange={(e) => setEditingContent({ ...editingContent, title: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>내용</Label>
+                <Textarea
+                  value={editingContent.content}
+                  onChange={(e) => setEditingContent({ ...editingContent, content: e.target.value })}
+                  rows={6}
+                />
+              </div>
+              <Button 
+                onClick={() => updateWebContentMutation.mutate({ 
+                  id: editingContent.id, 
+                  data: { 
+                    section: editingContent.section, 
+                    key: editingContent.key, 
+                    title: editingContent.title, 
+                    content: editingContent.content 
+                  }
+                })}
+                disabled={updateWebContentMutation.isPending}
+                className="w-full"
+              >
+                {updateWebContentMutation.isPending ? "수정 중..." : "수정"}
               </Button>
             </div>
           </DialogContent>

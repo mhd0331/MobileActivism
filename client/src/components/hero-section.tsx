@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PenTool, Lightbulb, ArrowRight } from "lucide-react";
+import { useContentText } from "@/hooks/useWebContent";
 
 interface HeroSectionProps {
   onSectionChange: (section: string) => void;
@@ -11,6 +12,11 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
   const { data: stats } = useQuery({
     queryKey: ["/api/stats"],
   });
+
+  // Get content from database
+  const mainTitle = useContentText("hero", "main_title", "진안군 목조전망대 건설 반대");
+  const subtitle = useContentText("hero", "subtitle", "자연을 지키고 미래를 생각하는 선택");
+  const description = useContentText("hero", "description", "지방자치법 위반 우려");
 
   const handleButtonClick = (section: string) => {
     console.log(`Hero button clicked: ${section}`);
@@ -22,11 +28,16 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-            445억 원 혈세 폭탄을 막아주세요!
+            {mainTitle}
           </h2>
           <p className="text-lg sm:text-xl mb-6 opacity-90">
-            군민 1인당 178만원, 4인 가족 기준 712만원의 부담
+            {subtitle}
           </p>
+          <div className="max-w-2xl mx-auto mb-6">
+            <p className="text-base opacity-90">
+              {description}
+            </p>
+          </div>
           
           {/* 바로가기 버튼들 */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

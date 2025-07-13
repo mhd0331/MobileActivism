@@ -76,6 +76,19 @@ export const resources = pgTable("resources", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Website content management table
+export const webContent = pgTable("web_content", {
+  id: serial("id").primaryKey(),
+  section: text("section").notNull(), // hero, motivation, footer, etc.
+  key: text("key").notNull(), // specific content identifier
+  title: text("title"),
+  content: text("content").notNull(),
+  metadata: jsonb("metadata"), // additional properties like styling, order, etc.
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   signatures: many(signatures),
@@ -117,6 +130,7 @@ export const insertPolicySupportSchema = createInsertSchema(policySupports).omit
 export const insertNoticeSchema = createInsertSchema(notices).omit({ id: true, createdAt: true });
 export const insertResourceSchema = createInsertSchema(resources).omit({ id: true, createdAt: true });
 export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({ id: true, createdAt: true, lastLogin: true });
+export const insertWebContentSchema = createInsertSchema(webContent).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -133,3 +147,5 @@ export type Resource = typeof resources.$inferSelect;
 export type InsertResource = z.infer<typeof insertResourceSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+export type WebContent = typeof webContent.$inferSelect;
+export type InsertWebContent = z.infer<typeof insertWebContentSchema>;

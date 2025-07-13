@@ -1,9 +1,9 @@
 import { 
-  users, signatures, policies, policySupports, notices, resources, adminUsers,
+  users, signatures, policies, policySupports, notices, resources, adminUsers, webContent,
   type User, type InsertUser, type Signature, type InsertSignature,
   type Policy, type InsertPolicy, type PolicySupport, type InsertPolicySupport,
   type Notice, type InsertNotice, type Resource, type InsertResource,
-  type AdminUser, type InsertAdminUser
+  type AdminUser, type InsertAdminUser, type WebContent, type InsertWebContent
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, count, sql, and } from "drizzle-orm";
@@ -55,6 +55,13 @@ export interface IStorage {
   deleteResource(id: number): Promise<void>;
   updatePolicy(id: number, policy: Partial<InsertPolicy>): Promise<Policy>;
   deletePolicy(id: number): Promise<void>;
+
+  // Web Content Management
+  getWebContent(section?: string): Promise<WebContent[]>;
+  getWebContentByKey(section: string, key: string): Promise<WebContent | undefined>;
+  createWebContent(content: InsertWebContent): Promise<WebContent>;
+  updateWebContent(id: number, content: Partial<InsertWebContent>): Promise<WebContent>;
+  deleteWebContent(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -234,6 +241,48 @@ export class DatabaseStorage implements IStorage {
     await db.delete(policies).where(eq(policies.id, id));
     // Also delete related supports
     await db.delete(policySupports).where(eq(policySupports.policyId, id));
+  }
+
+  // Web Content Management
+  async getWebContent(section?: string): Promise<WebContent[]> {
+    if (section) {
+      return await db
+        .select()
+        .from(webContent)
+        .where(and(eq(webContent.isActive, true), eq(webContent.section, section)))
+        .orderBy(webContent.createdAt);
+    }
+    return await db
+      .select()
+      .from(webContent)
+      .where(eq(webContent.isActive, true))
+      .orderBy(webContent.section, webContent.createdAt);
+  }
+
+  async getWebContentByKey(section: string, key: string): Promise<WebContent | undefined> {
+    const [content] = await db
+      .select()
+      .from(webContent)
+      .where(and(eq(webContent.section, section), eq(webContent.key, key), eq(webContent.isActive, true)));
+    return content || undefined;
+  }
+
+  async createWebContent(insertContent: InsertWebContent): Promise<WebContent> {
+    const [content] = await db.insert(webContent).values(insertContent).returning();
+    return content;
+  }
+
+  async updateWebContent(id: number, updateData: Partial<InsertWebContent>): Promise<WebContent> {
+    const [content] = await db
+      .update(webContent)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(webContent.id, id))
+      .returning();
+    return content;
+  }
+
+  async deleteWebContent(id: number): Promise<void> {
+    await db.update(webContent).set({ isActive: false }).where(eq(webContent.id, id));
   }
 }
 

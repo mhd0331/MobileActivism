@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import session from "express-session";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
-import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdminUserSchema, insertNoticeSchema, insertResourceSchema } from "@shared/schema";
+import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdminUserSchema, insertNoticeSchema, insertResourceSchema, insertWebContentSchema } from "@shared/schema";
 import { z } from "zod";
 
 declare module 'express-session' {
@@ -375,6 +375,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Policy deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete policy" });
+    }
+  });
+
+  // Web Content Management Routes
+  app.get("/api/web-content", async (req, res) => {
+    try {
+      const section = req.query.section as string;
+      const content = await storage.getWebContent(section);
+      res.json({ content });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch web content" });
+    }
+  });
+
+  app.get("/api/web-content/:section/:key", async (req, res) => {
+    try {
+      const { section, key } = req.params;
+      const content = await storage.getWebContentByKey(section, key);
+      if (!content) {
+        return res.status(404).json({ message: "Content not found" });
+      }
+      res.json({ content });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch web content" });
+    }
+  });
+
+  app.post("/api/admin/web-content", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertWebContentSchema.parse(req.body);
+      const content = await storage.createWebContent(validatedData);
+      res.json({ content });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid content data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create web content" });
+    }
+  });
+
+  app.put("/api/admin/web-content/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid content ID" });
+      }
+      
+      const validatedData = insertWebContentSchema.partial().parse(req.body);
+      const content = await storage.updateWebContent(id, validatedData);
+      res.json({ content });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid content data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update web content" });
+    }
+  });
+
+  app.delete("/api/admin/web-content/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid content ID" });
+      }
+      
+      await storage.deleteWebContent(id);
+      res.json({ message: "Web content deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete web content" });
     }
   });
 
