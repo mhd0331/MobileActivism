@@ -17,6 +17,8 @@ export function useWebContentByKey(section: string, key: string) {
     queryKey: ["/api/web-content", section, key],
     queryFn: () => apiRequest(`/api/web-content/${section}/${key}`),
     enabled: !!(section && key),
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -69,8 +71,8 @@ export function useDeleteWebContent() {
 
 // Helper hook for getting specific content by key
 export function useContentText(section: string, key: string, fallback: string = "") {
-  const { data, isLoading } = useWebContentByKey(section, key);
+  const { data, isLoading, error } = useWebContentByKey(section, key);
   
-  if (isLoading) return fallback;
+  if (isLoading || error) return fallback;
   return data?.content?.content || fallback;
 }
