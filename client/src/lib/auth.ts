@@ -5,6 +5,7 @@ export interface User {
   id: number;
   name: string;
   phone: string;
+  district: string;
 }
 
 export interface AuthResponse {
@@ -14,6 +15,7 @@ export interface AuthResponse {
 export interface LoginData {
   name: string;
   phone: string;
+  district: string;
 }
 
 export function useAuth() {

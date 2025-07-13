@@ -10,7 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, ShieldQuestion } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Shield, ShieldQuestion, MapPin } from "lucide-react";
+import { jinanDistricts } from "@shared/schema";
 
 interface AuthModalProps {
   open: boolean;
@@ -20,16 +22,17 @@ interface AuthModalProps {
 export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [district, setDistrict] = useState("");
   const login = useLogin();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !phone.trim()) {
+    if (!name.trim() || !phone.trim() || !district.trim()) {
       toast({
         title: "입력 오류",
-        description: "이름과 전화번호를 모두 입력해주세요.",
+        description: "이름, 전화번호, 거주지역을 모두 입력해주세요.",
         variant: "destructive",
       });
       return;
@@ -47,13 +50,14 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     }
 
     try {
-      await login.mutateAsync({ name, phone });
+      await login.mutateAsync({ name, phone, district });
       toast({
         title: "로그인 성공",
         description: "안전하게 로그인되었습니다.",
       });
       setName("");
       setPhone("");
+      setDistrict("");
       onOpenChange(false);
     } catch (error) {
       toast({
@@ -102,6 +106,25 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
               className="mt-1 text-lg py-3"
               required
             />
+          </div>
+
+          <div>
+            <Label htmlFor="district">거주지역</Label>
+            <Select value={district} onValueChange={setDistrict} required>
+              <SelectTrigger className="mt-1 text-lg py-3">
+                <SelectValue placeholder="진안군 내 거주지역을 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
+                {jinanDistricts.map((districtName) => (
+                  <SelectItem key={districtName} value={districtName}>
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      {districtName}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="bg-blue-50 p-4 rounded-lg">

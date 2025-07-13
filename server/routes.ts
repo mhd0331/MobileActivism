@@ -45,25 +45,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const { name, phone } = insertUserSchema.parse(req.body);
+      const { name, phone, district } = insertUserSchema.parse(req.body);
       
       // Check if user exists
       let user = await storage.getUserByPhone(phone);
       
       if (!user) {
         // Create new user
-        user = await storage.createUser({ name, phone });
+        user = await storage.createUser({ name, phone, district });
       } else {
-        // Update name if different
-        if (user.name !== name) {
-          // In a real app, you might want to handle name updates differently
-          console.log(`Name mismatch for ${phone}: ${user.name} vs ${name}`);
+        // Update user info if different
+        if (user.name !== name || user.district !== district) {
+          // In a real app, you might want to handle updates differently
+          console.log(`User info update for ${phone}: name ${user.name} -> ${name}, district ${user.district} -> ${district}`);
         }
       }
       
       req.session.userId = user.id;
-      res.json({ user: { id: user.id, name: user.name, phone: user.phone } });
+      res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
     } catch (error) {
+      console.error('Login error:', error);
       res.status(400).json({ message: "Invalid user data" });
     }
   });
@@ -87,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ message: "User not found" });
     }
     
-    res.json({ user: { id: user.id, name: user.name, phone: user.phone } });
+    res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
   });
 
   // Signature routes

@@ -3,11 +3,27 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Jin-an County administrative districts
+export const jinanDistricts = [
+  '진안읍',
+  '마령면',
+  '부귀면',
+  '정천면',
+  '용담면',
+  '백운면',
+  '주천면',
+  '동향면',
+  '안천면',
+  '성수면',
+  '상전면'
+] as const;
+
 // Users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   phone: text("phone").notNull().unique(),
+  district: text("district").notNull().default('진안읍'), // Jin-an County administrative district
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
