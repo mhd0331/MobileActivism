@@ -1,8 +1,9 @@
 import { 
-  users, signatures, policies, policySupports, notices, resources,
+  users, signatures, policies, policySupports, notices, resources, adminUsers,
   type User, type InsertUser, type Signature, type InsertSignature,
   type Policy, type InsertPolicy, type PolicySupport, type InsertPolicySupport,
-  type Notice, type InsertNotice, type Resource, type InsertResource
+  type Notice, type InsertNotice, type Resource, type InsertResource,
+  type AdminUser, type InsertAdminUser
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, count, sql, and } from "drizzle-orm";
@@ -41,6 +42,19 @@ export interface IStorage {
     supportCount: number;
     userCount: number;
   }>;
+
+  // Admin Operations
+  getAdminByUsername(username: string): Promise<AdminUser | undefined>;
+  createAdmin(admin: InsertAdminUser): Promise<AdminUser>;
+  updateAdminLastLogin(id: number): Promise<void>;
+  
+  // Admin CRUD for entities
+  updateNotice(id: number, notice: Partial<InsertNotice>): Promise<Notice>;
+  deleteNotice(id: number): Promise<void>;
+  updateResource(id: number, resource: Partial<InsertResource>): Promise<Resource>;
+  deleteResource(id: number): Promise<void>;
+  updatePolicy(id: number, policy: Partial<InsertPolicy>): Promise<Policy>;
+  deletePolicy(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -175,6 +189,51 @@ export class DatabaseStorage implements IStorage {
       supportCount: supportCount.count,
       userCount: userCount.count,
     };
+  }
+
+  // Admin Operations
+  async getAdminByUsername(username: string): Promise<AdminUser | undefined> {
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.username, username));
+    return admin || undefined;
+  }
+
+  async createAdmin(insertAdmin: InsertAdminUser): Promise<AdminUser> {
+    const [admin] = await db.insert(adminUsers).values(insertAdmin).returning();
+    return admin;
+  }
+
+  async updateAdminLastLogin(id: number): Promise<void> {
+    await db.update(adminUsers).set({ lastLogin: new Date() }).where(eq(adminUsers.id, id));
+  }
+
+  // Admin CRUD operations
+  async updateNotice(id: number, updateData: Partial<InsertNotice>): Promise<Notice> {
+    const [notice] = await db.update(notices).set(updateData).where(eq(notices.id, id)).returning();
+    return notice;
+  }
+
+  async deleteNotice(id: number): Promise<void> {
+    await db.delete(notices).where(eq(notices.id, id));
+  }
+
+  async updateResource(id: number, updateData: Partial<InsertResource>): Promise<Resource> {
+    const [resource] = await db.update(resources).set(updateData).where(eq(resources.id, id)).returning();
+    return resource;
+  }
+
+  async deleteResource(id: number): Promise<void> {
+    await db.delete(resources).where(eq(resources.id, id));
+  }
+
+  async updatePolicy(id: number, updateData: Partial<InsertPolicy>): Promise<Policy> {
+    const [policy] = await db.update(policies).set(updateData).where(eq(policies.id, id)).returning();
+    return policy;
+  }
+
+  async deletePolicy(id: number): Promise<void> {
+    await db.delete(policies).where(eq(policies.id, id));
+    // Also delete related supports
+    await db.delete(policySupports).where(eq(policySupports.policyId, id));
   }
 }
 

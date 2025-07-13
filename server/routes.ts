@@ -1,13 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import bcrypt from "bcryptjs";
 import { storage } from "./storage";
-import { insertUserSchema, insertPolicySchema, insertSignatureSchema } from "@shared/schema";
+import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdminUserSchema, insertNoticeSchema, insertResourceSchema } from "@shared/schema";
 import { z } from "zod";
 
 declare module 'express-session' {
   interface SessionData {
     userId?: number;
+    adminId?: number;
   }
 }
 
@@ -28,6 +30,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const requireAuth = (req: any, res: any, next: any) => {
     if (!req.session.userId) {
       return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
+
+  // Admin authentication middleware
+  const requireAdminAuth = (req: any, res: any, next: any) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ message: "Admin authentication required" });
     }
     next();
   };
@@ -198,6 +208,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ stats });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch statistics" });
+    }
+  });
+
+  // Admin Authentication Routes
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required" });
+      }
+      
+      const admin = await storage.getAdminByUsername(username);
+      if (!admin || !admin.isActive) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      const isValidPassword = await bcrypt.compare(password, admin.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      req.session.adminId = admin.id;
+      await storage.updateAdminLastLogin(admin.id);
+      
+      res.json({ admin: { id: admin.id, username: admin.username, role: admin.role } });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.adminId = undefined;
+    res.json({ message: "Logged out successfully" });
+  });
+
+  app.get("/api/admin/me", requireAdminAuth, async (req, res) => {
+    try {
+      const admin = await storage.getAdminByUsername("");
+      res.json({ admin: { id: req.session.adminId } });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get admin info" });
+    }
+  });
+
+  // Admin CRUD Routes for Notices
+  app.post("/api/admin/notices", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertNoticeSchema.parse(req.body);
+      const notice = await storage.createNotice(validatedData);
+      res.json({ notice });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid notice data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create notice" });
+    }
+  });
+
+  app.put("/api/admin/notices/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid notice ID" });
+      }
+      
+      const validatedData = insertNoticeSchema.partial().parse(req.body);
+      const notice = await storage.updateNotice(id, validatedData);
+      res.json({ notice });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid notice data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update notice" });
+    }
+  });
+
+  app.delete("/api/admin/notices/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid notice ID" });
+      }
+      
+      await storage.deleteNotice(id);
+      res.json({ message: "Notice deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete notice" });
+    }
+  });
+
+  // Admin CRUD Routes for Resources
+  app.post("/api/admin/resources", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertResourceSchema.parse(req.body);
+      const resource = await storage.createResource(validatedData);
+      res.json({ resource });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid resource data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create resource" });
+    }
+  });
+
+  app.put("/api/admin/resources/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid resource ID" });
+      }
+      
+      const validatedData = insertResourceSchema.partial().parse(req.body);
+      const resource = await storage.updateResource(id, validatedData);
+      res.json({ resource });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid resource data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update resource" });
+    }
+  });
+
+  app.delete("/api/admin/resources/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid resource ID" });
+      }
+      
+      await storage.deleteResource(id);
+      res.json({ message: "Resource deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete resource" });
+    }
+  });
+
+  // Admin CRUD Routes for Policies
+  app.put("/api/admin/policies/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid policy ID" });
+      }
+      
+      const validatedData = insertPolicySchema.partial().parse(req.body);
+      const policy = await storage.updatePolicy(id, validatedData);
+      res.json({ policy });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid policy data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update policy" });
+    }
+  });
+
+  app.delete("/api/admin/policies/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid policy ID" });
+      }
+      
+      await storage.deletePolicy(id);
+      res.json({ message: "Policy deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete policy" });
     }
   });
 

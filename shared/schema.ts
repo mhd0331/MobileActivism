@@ -11,6 +11,18 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Admin users table
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  email: text("email"),
+  role: text("role").notNull().default('admin'), // admin, super_admin
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastLogin: timestamp("last_login"),
+});
+
 // Signatures table
 export const signatures = pgTable("signatures", {
   id: serial("id").primaryKey(),
@@ -104,6 +116,7 @@ export const insertPolicySchema = createInsertSchema(policies).omit({ id: true, 
 export const insertPolicySupportSchema = createInsertSchema(policySupports).omit({ id: true, createdAt: true });
 export const insertNoticeSchema = createInsertSchema(notices).omit({ id: true, createdAt: true });
 export const insertResourceSchema = createInsertSchema(resources).omit({ id: true, createdAt: true });
+export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({ id: true, createdAt: true, lastLogin: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -118,3 +131,5 @@ export type Notice = typeof notices.$inferSelect;
 export type InsertNotice = z.infer<typeof insertNoticeSchema>;
 export type Resource = typeof resources.$inferSelect;
 export type InsertResource = z.infer<typeof insertResourceSchema>;
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;

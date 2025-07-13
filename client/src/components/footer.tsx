@@ -1,6 +1,10 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { useState } from "react";
+import { Mail, Phone, MapPin, Shield } from "lucide-react";
+import { Link } from "wouter";
+import AdminLoginModal from "./admin-login-modal";
 
 export default function Footer() {
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
   return (
     <footer className="bg-gray-900 text-white py-8 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,12 +37,19 @@ export default function Footer() {
           </div>
           
           <div>
-            <h4 className="text-lg font-semibold mb-4">개인정보 보호</h4>
+            <h4 className="text-lg font-semibold mb-4">정보</h4>
             <div className="text-gray-300 text-sm space-y-2">
               <p>• 수집된 정보는 캠페인 목적으로만 사용</p>
               <p>• SSL 암호화로 안전하게 보관</p>
               <p>• 제3자 제공 금지</p>
               <p>• 캠페인 종료 후 즉시 삭제</p>
+              <button 
+                onClick={() => setShowAdminLogin(true)}
+                className="flex items-center text-gray-400 hover:text-white transition-colors mt-4"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                관리자 로그인
+              </button>
             </div>
           </div>
         </div>
@@ -48,6 +59,12 @@ export default function Footer() {
           <p className="mt-2">이 앱은 민주적 참여를 위한 비영리 목적으로 제작되었습니다.</p>
         </div>
       </div>
+      
+      <AdminLoginModal
+        open={showAdminLogin}
+        onOpenChange={setShowAdminLogin}
+        onSuccess={() => window.location.href = '/admin'}
+      />
     </footer>
   );
 }
