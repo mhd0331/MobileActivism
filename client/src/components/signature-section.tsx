@@ -71,8 +71,37 @@ export default function SignatureSection() {
   return (
     <>
       <section>
+        {/* 서명 운동 메인 박스 - 상단 이동 */}
         <div className="mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">서명 운동</h3>
+          <Card>
+            <CardContent className="p-6 text-center">
+              <h4 className="text-xl font-bold text-gray-900 mb-2">목조전망대 건설 반대 서명</h4>
+              <p className="text-gray-600 mb-6">군민의 소중한 한 표로 민주주의를 지켜주세요</p>
+              
+              {hasSigned ? (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                  <span className="text-green-800 font-medium">서명이 완료되었습니다. 참여해 주셔서 감사합니다!</span>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleSignature}
+                  disabled={signatureMutation.isPending || checkLoading}
+                  size="lg"
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-bold shadow-lg"
+                >
+                  <PenTool className="h-5 w-5 mr-2" />
+                  {signatureMutation.isPending ? "서명 처리 중..." : "서명 참여하기"}
+                </Button>
+              )}
+              
+              <p className="text-xs text-gray-500 mt-4">* 1인 1회만 참여 가능하며, 실명 인증이 필요합니다</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">서명 현황</h3>
           
           {/* 서명 진행 현황 */}
           <Card className="mb-6">
@@ -169,32 +198,7 @@ export default function SignatureSection() {
             </div>
           </div>
 
-          {/* 서명 참여 버튼 */}
-          <Card>
-            <CardContent className="p-6 text-center">
-              <h4 className="text-xl font-bold text-gray-900 mb-2">목조전망대 건설 반대 서명</h4>
-              <p className="text-gray-600 mb-6">군민의 소중한 한 표로 민주주의를 지켜주세요</p>
-              
-              {hasSigned ? (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <span className="text-green-800 font-medium">서명이 완료되었습니다. 참여해 주셔서 감사합니다!</span>
-                </div>
-              ) : (
-                <Button
-                  onClick={handleSignature}
-                  disabled={signatureMutation.isPending || checkLoading}
-                  size="lg"
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-bold shadow-lg"
-                >
-                  <PenTool className="h-5 w-5 mr-2" />
-                  {signatureMutation.isPending ? "서명 처리 중..." : "서명 참여하기"}
-                </Button>
-              )}
-              
-              <p className="text-xs text-gray-500 mt-4">* 1인 1회만 참여 가능하며, 실명 인증이 필요합니다</p>
-            </CardContent>
-          </Card>
+
         </div>
       </section>
       
