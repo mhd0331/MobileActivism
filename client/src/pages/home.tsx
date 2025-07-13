@@ -14,6 +14,17 @@ import FloatingSignatureButton from "@/components/floating-signature-button";
 export default function Home() {
   const [currentSection, setCurrentSection] = useState("notices");
 
+  const handleSectionChange = (section: string) => {
+    setCurrentSection(section);
+    // Scroll to main content area
+    setTimeout(() => {
+      const mainElement = document.querySelector('main');
+      if (mainElement) {
+        mainElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
   const renderSection = () => {
     switch (currentSection) {
       case "notices":
@@ -34,9 +45,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <HeroSection onSectionChange={setCurrentSection} />
+      <HeroSection onSectionChange={handleSectionChange} />
       <MotivationSection />
-      <Navigation currentSection={currentSection} onSectionChange={setCurrentSection} />
+      <Navigation currentSection={currentSection} onSectionChange={handleSectionChange} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {renderSection()}

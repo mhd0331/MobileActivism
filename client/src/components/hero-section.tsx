@@ -12,6 +12,11 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
     queryKey: ["/api/stats"],
   });
 
+  const handleButtonClick = (section: string) => {
+    console.log(`Hero button clicked: ${section}`);
+    onSectionChange(section);
+  };
+
   return (
     <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,9 +31,9 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
           {/* 바로가기 버튼들 */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Button
-              onClick={() => onSectionChange("signature")}
+              onClick={() => handleButtonClick("signature")}
               size="lg"
-              className="bg-white text-blue-700 hover:bg-blue-50 font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+              className="bg-white text-blue-700 hover:bg-blue-50 font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
             >
               <PenTool className="h-5 w-5 mr-2" />
               서명 바로가기
@@ -36,10 +41,10 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
             </Button>
             
             <Button
-              onClick={() => onSectionChange("policies")}
+              onClick={() => handleButtonClick("policies")}
               size="lg"
               variant="outline"
-              className="border-white text-white hover:bg-white hover:text-blue-700 font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+              className="border-white border-2 text-white hover:bg-white hover:text-blue-700 font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
             >
               <Lightbulb className="h-5 w-5 mr-2" />
               정책제안 바로가기
