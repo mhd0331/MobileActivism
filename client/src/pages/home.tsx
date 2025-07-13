@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/header";
 import HeroSection from "@/components/hero-section";
+import MotivationSection from "@/components/motivation-section";
 import Navigation from "@/components/navigation";
 import NoticesSection from "@/components/notices-section";
 import SignatureSection from "@/components/signature-section";
@@ -33,7 +34,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <HeroSection />
+      <HeroSection onSectionChange={setCurrentSection} />
+      <MotivationSection />
       <Navigation currentSection={currentSection} onSectionChange={setCurrentSection} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -5,7 +5,7 @@ import {
   type Notice, type InsertNotice, type Resource, type InsertResource
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, count, sql } from "drizzle-orm";
+import { eq, desc, count, sql, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -81,13 +81,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPolicies(category?: string): Promise<Policy[]> {
-    let query = db.select().from(policies).orderBy(desc(policies.createdAt));
-    
     if (category && category !== 'all') {
-      query = query.where(eq(policies.category, category));
+      return await db.select().from(policies)
+        .where(eq(policies.category, category))
+        .orderBy(desc(policies.createdAt));
     }
     
-    return await query;
+    return await db.select().from(policies).orderBy(desc(policies.createdAt));
   }
 
   async getPolicy(id: number): Promise<Policy | undefined> {
@@ -123,8 +123,7 @@ export class DatabaseStorage implements IStorage {
     const [support] = await db
       .select()
       .from(policySupports)
-      .where(eq(policySupports.policyId, policyId))
-      .where(eq(policySupports.userId, userId));
+      .where(and(eq(policySupports.policyId, policyId), eq(policySupports.userId, userId)));
     return support || undefined;
   }
 

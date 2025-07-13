@@ -25,7 +25,7 @@ export default function FloatingSignatureButton() {
       <Button
         onClick={handleClick}
         size="lg"
-        className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg bg-orange-600 hover:bg-orange-700 text-white h-14 w-14 p-0"
+        className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground h-14 w-14 p-0 transition-all duration-300 transform hover:scale-110"
       >
         <PenTool className="h-6 w-6" />
       </Button>
