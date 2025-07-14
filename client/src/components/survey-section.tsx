@@ -26,6 +26,8 @@ function useSurveyContent(key: string) {
     console.error(`Failed to load survey content for key: ${key}`, error);
   }
   
+  console.log(`Survey content for ${key}:`, data?.content?.content);
+  
   // Return content from the nested structure
   return data?.content?.content || "";
 }
@@ -83,6 +85,18 @@ export default function SurveySection() {
   const previousButton = useSurveyContent("previous_button") || "이전";
   const nextButton = useSurveyContent("next_button") || "다음";
   const submitButton = useSurveyContent("submit_button") || "제출하기";
+
+  // Debug logging for buttons specifically
+  useEffect(() => {
+    console.log("Button text values:", { 
+      previousButton, 
+      nextButton, 
+      submitButton,
+      rawPrevious: useSurveyContent("previous_button"),
+      rawNext: useSurveyContent("next_button"),
+      rawSubmit: useSurveyContent("submit_button")
+    });
+  }, [previousButton, nextButton, submitButton]);
   const requiredFieldError = useSurveyContent("required_field_error") || "필수 문항입니다. 답변을 선택해주세요.";
 
 
