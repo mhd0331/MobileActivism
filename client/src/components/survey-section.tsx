@@ -249,22 +249,34 @@ export default function SurveySection() {
 
   // Handle successful login - exactly same as signature section
   const handleAuthSuccess = () => {
+    console.log("Login success callback triggered");
     setShowAuthModal(false);
-    // Invalidate auth queries to refresh user state
+    // Force refetch auth state immediately
+    queryClient.removeQueries({ queryKey: ["/api/me"] });
     queryClient.invalidateQueries({ queryKey: ["/api/me"] });
     
     // Attempt submission after successful login with delay (same as signature)
-    setTimeout(() => {
+    setTimeout(async () => {
       console.log("Retrying submission after login success");
-      // Re-check auth state before attempting submission
+      // Force refresh auth state before attempting submission
+      const freshAuthResult = await queryClient.fetchQuery({ queryKey: ["/api/me"] });
+      console.log("Fresh auth result:", freshAuthResult);
+      
       if (!survey) {
         console.log("No survey available");
         return;
       }
       
+      if (!freshAuthResult) {
+        console.log("Still not authenticated after login, showing modal again");
+        setShowAuthModal(true);
+        return;
+      }
+      
+      console.log("Auth confirmed, proceeding with submission");
       // Force call handleSubmit again to go through proper auth check
       handleSubmit();
-    }, 1500); // Increased delay to allow auth state to update
+    }, 2000); // Increased delay to allow auth state to update
   };
 
   const isCurrentAnswered = currentQuestion ? 

@@ -47,6 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.post("/api/login", async (req, res) => {
     try {
+      console.log('Login attempt:', req.body);
       const { name, phone, district } = insertUserSchema.parse(req.body);
       
       // Check if user exists
@@ -54,16 +55,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!user) {
         // Create new user
+        console.log('Creating new user:', { name, phone, district });
         user = await storage.createUser({ name, phone, district });
+        console.log('Created user:', user);
       } else {
         // Update user info if different
         if (user.name !== name || user.district !== district) {
-          // In a real app, you might want to handle updates differently
           console.log(`User info update for ${phone}: name ${user.name} -> ${name}, district ${user.district} -> ${district}`);
         }
       }
       
       req.session.userId = user.id;
+      console.log('Session set with userId:', user.id);
+      console.log('Session ID:', req.sessionID);
+      
+      // Force save session
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+        } else {
+          console.log('Session saved successfully');
+        }
+      });
+      
       res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
     } catch (error) {
       console.error('Login error:', error);
