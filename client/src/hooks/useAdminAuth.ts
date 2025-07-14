@@ -41,6 +41,8 @@ export function useAdminAuth() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/me'] });
+      // Redirect to home page after logout
+      window.location.href = '/';
     },
   });
 

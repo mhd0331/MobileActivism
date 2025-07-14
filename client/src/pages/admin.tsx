@@ -25,10 +25,10 @@ export default function AdminPage() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !showLoginModal) {
       setShowLoginModal(true);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, showLoginModal]);
 
   // Queries
   const { data: noticesData = { notices: [] } } = useQuery({

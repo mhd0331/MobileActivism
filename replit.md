@@ -114,9 +114,21 @@ Core entities include:
 
 ## Recent Changes (July 14, 2025)
 
+### Complete Database-Driven CMS Implementation
+- **Full Text Database Migration**: All webpage text content moved from hardcoded to database-driven
+- **Component Database Integration**: Hero, motivation, header, footer, navigation sections now read from database
+- **Content Initialization System**: Added "콘텐츠 초기화" button in admin panel for setting up default content
+- **Dynamic Content Management**: All text can be edited in CMS and immediately reflects on webpage
+- **Content Workflow**: Database storage → CMS loading → editing → saving back to database → webpage update
+
 ### Admin Panel Signature Restriction
 - **Signature Data Protection**: Removed all signature editing capabilities from admin CMS
 - **Read-only Statistics**: Signature count is now displayed as read-only statistic only
 - **Content Filtering**: Signature-related content cannot be created or edited via web content management
 - **Automatic Calculation**: All signature statistics are automatically calculated from database
 - **User Intent**: Ensures signature campaign data integrity and prevents unauthorized modifications
+
+### Admin Logout Fix
+- **Infinite Loop Resolution**: Fixed admin logout infinite loop issue by improving state management
+- **Proper Redirect**: Admin logout now properly redirects to homepage after successful logout
+- **State Management**: Improved authentication state handling to prevent UI conflicts
