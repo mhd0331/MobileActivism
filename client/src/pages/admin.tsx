@@ -31,30 +31,30 @@ export default function AdminPage() {
   }, [isAuthenticated]);
 
   // Queries
-  const { data: notices = [] } = useQuery({
+  const { data: noticesData = { notices: [] } } = useQuery({
     queryKey: ['/api/notices'],
     enabled: isAuthenticated,
   });
+  const notices = noticesData.notices || [];
 
-  const { data: resources = [] } = useQuery({
+  const { data: resourcesData = { resources: [] } } = useQuery({
     queryKey: ['/api/resources'],
     enabled: isAuthenticated,
   });
+  const resources = resourcesData.resources || [];
 
-  const { data: policies = [] } = useQuery({
+  const { data: policiesData = { policies: [] } } = useQuery({
     queryKey: ['/api/policies'],
     enabled: isAuthenticated,
   });
+  const policies = policiesData.policies || [];
 
   const { data: webContent = [] } = useWebContent();
   
   const createWebContentMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/admin/web-content', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await apiRequest("POST", "/api/admin/web-content", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/web-content'] });
@@ -65,11 +65,8 @@ export default function AdminPage() {
 
   const updateWebContentMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return await apiRequest(`/api/admin/web-content/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await apiRequest("PUT", `/api/admin/web-content/${id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/web-content'] });
@@ -80,7 +77,8 @@ export default function AdminPage() {
 
   const deleteWebContentMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/web-content/${id}`, { method: 'DELETE' });
+      const response = await apiRequest("DELETE", `/api/admin/web-content/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/web-content'] });
@@ -99,11 +97,8 @@ export default function AdminPage() {
 
   const createNoticeMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/admin/notices', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await apiRequest("POST", "/api/admin/notices", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notices'] });
@@ -114,11 +109,8 @@ export default function AdminPage() {
 
   const updateNoticeMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return await apiRequest(`/api/admin/notices/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await apiRequest("PUT", `/api/admin/notices/${id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notices'] });
@@ -129,7 +121,8 @@ export default function AdminPage() {
 
   const deleteNoticeMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/notices/${id}`, { method: 'DELETE' });
+      const response = await apiRequest("DELETE", `/api/admin/notices/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notices'] });
@@ -150,11 +143,8 @@ export default function AdminPage() {
 
   const createResourceMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/admin/resources', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await apiRequest("POST", "/api/admin/resources", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/resources'] });
@@ -165,11 +155,8 @@ export default function AdminPage() {
 
   const updateResourceMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return await apiRequest(`/api/admin/resources/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await apiRequest("PUT", `/api/admin/resources/${id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/resources'] });
@@ -180,7 +167,8 @@ export default function AdminPage() {
 
   const deleteResourceMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/resources/${id}`, { method: 'DELETE' });
+      const response = await apiRequest("DELETE", `/api/admin/resources/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/resources'] });
@@ -191,7 +179,8 @@ export default function AdminPage() {
   // Policy Management
   const deletePolicyMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/policies/${id}`, { method: 'DELETE' });
+      const response = await apiRequest("DELETE", `/api/admin/policies/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/policies'] });
