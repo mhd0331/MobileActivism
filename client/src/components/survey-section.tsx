@@ -15,10 +15,18 @@ import AuthModal from "@/components/auth-modal";
 
 // Hook to get survey content from database
 function useSurveyContent(key: string) {
-  const { data } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: [`/api/web-content/survey/${key}`],
     retry: false,
+    staleTime: 0, // Always fetch fresh data
   });
+  
+  // Debug logging
+  if (error) {
+    console.error(`Failed to load survey content for key: ${key}`, error);
+  }
+  
+  // Return content from the nested structure
   return data?.content?.content || "";
 }
 
@@ -76,6 +84,8 @@ export default function SurveySection() {
   const nextButton = useSurveyContent("next_button") || "다음";
   const submitButton = useSurveyContent("submit_button") || "제출하기";
   const requiredFieldError = useSurveyContent("required_field_error") || "필수 문항입니다. 답변을 선택해주세요.";
+
+
 
   // Fetch active survey
   const { data: survey, isLoading: surveyLoading, error: surveyError } = useQuery({
