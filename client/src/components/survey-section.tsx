@@ -71,6 +71,9 @@ export default function SurveySection() {
     staleTime: 0, // Always fetch fresh data for auth state
   });
 
+  // Debug logging
+  console.log('Survey Section - Current User:', currentUser);
+
   // Submit survey response
   const submitSurveyMutation = useMutation({
     mutationFn: async (responseData: any) => {
