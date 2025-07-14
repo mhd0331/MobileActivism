@@ -46,7 +46,7 @@ interface SurveyResults {
 }
 
 export default function SurveySection() {
-  const { data: auth } = useAuth();
+  const { data: auth, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -97,7 +97,7 @@ export default function SurveySection() {
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!survey?.id && !!auth?.user,
+    enabled: !!survey?.id && !!auth,
     staleTime: 0,
   });
 
@@ -129,7 +129,7 @@ export default function SurveySection() {
         // Re-check auth state before showing modal
         queryClient.invalidateQueries({ queryKey: ["/api/me"] });
         setTimeout(() => {
-          if (!auth?.user) {
+          if (!auth) {
             setShowAuthModal(true);
           }
         }, 100);
@@ -206,13 +206,13 @@ export default function SurveySection() {
     if (!survey) return;
 
     // Wait for auth loading to complete
-    if (auth.isLoading) {
+    if (authLoading) {
       console.log("Auth is loading, waiting...");
       return;
     }
 
     // Check if user is logged in first (using auth from useAuth hook)
-    if (!auth?.user) {
+    if (!auth) {
       console.log("User not authenticated, showing login modal");
       setShowAuthModal(true);
       return;
@@ -237,7 +237,6 @@ export default function SurveySection() {
     setShowAuthModal(false);
     // Invalidate auth queries to refresh user state
     queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     
     // Attempt submission after successful login with delay (same as signature)
     setTimeout(() => {
