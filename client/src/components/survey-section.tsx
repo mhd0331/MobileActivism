@@ -68,6 +68,7 @@ export default function SurveySection() {
   const { data: currentUser, refetch: refetchUser } = useQuery({
     queryKey: ["/api/me"],
     retry: false,
+    staleTime: 0, // Always fetch fresh data for auth state
   });
 
   // Submit survey response
@@ -165,7 +166,7 @@ export default function SurveySection() {
     if (!survey) return;
 
     // Check if user is logged in first
-    if (!currentUser?.user) {
+    if (!currentUser || !currentUser.user) {
       setPendingSubmission(true);
       setShowAuthModal(true);
       return;

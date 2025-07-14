@@ -22,6 +22,7 @@ export function useAuth() {
   return useQuery<AuthResponse | null>({
     queryKey: ["/api/me"],
     retry: false,
+    staleTime: 0, // Always fetch fresh data for auth state
   });
 }
 
@@ -37,9 +38,9 @@ export function useLogin() {
       return response;
     },
     onSuccess: () => {
-      // Force invalidate and refetch user data
+      // Force invalidate and refetch user data immediately
+      queryClient.removeQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      queryClient.refetchQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/signatures/check"] });
     },
   });
