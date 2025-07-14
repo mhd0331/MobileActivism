@@ -10,6 +10,9 @@ export default function Header() {
   const logout = useLogout();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  // Debug logging for auth state
+  console.log("Header auth state:", { auth, isLoading });
+
   // Get content from database
   const siteTitle = useContentText("header", "site_title", "진안군 목조전망대 반대 캠페인");
   const loginButton = useContentText("header", "login_button", "로그인");
@@ -32,16 +35,16 @@ export default function Header() {
             </div>
             
             <div className="flex items-center space-x-4">
-              {auth?.user && (
+              {auth && (
                 <div className="flex items-center space-x-2">
                   <UserCircle className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-medium">{auth.user.name}</span>
+                  <span className="text-sm font-medium">{auth.user?.name || "사용자"}</span>
                 </div>
               )}
               
               {!isLoading && (
                 <>
-                  {auth?.user ? (
+                  {auth ? (
                     <Button
                       onClick={handleLogout}
                       variant="outline"
