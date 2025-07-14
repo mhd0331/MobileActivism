@@ -76,7 +76,7 @@ export default function MotivationSection() {
                       </div>
                       <div>
                         <p className="font-bold text-red-800 mb-2">{democracyPoint1Title}</p>
-                        <p className="text-gray-700 text-sm">{democracyPoint1Content}</p>
+                        <p className="text-gray-700 text-base leading-relaxed">{democracyPoint1Content}</p>
                       </div>
                     </div>
                   </div>
@@ -89,7 +89,7 @@ export default function MotivationSection() {
                       <div>
                         <p className="font-bold text-red-800 mb-2">{democracyPoint2Title}</p>
                         {democracyPoint2Content.split('\n').map((line, idx) => (
-                          <p key={idx} className="text-gray-700 text-sm mb-2">{line}</p>
+                          <p key={idx} className="text-gray-700 text-base leading-relaxed mb-2">{line}</p>
                         ))}
                       </div>
                     </div>
@@ -103,7 +103,7 @@ export default function MotivationSection() {
                       <div>
                         <p className="font-bold text-red-800 mb-2">{democracyPoint3Title}</p>
                         {democracyPoint3Content.split('\n').map((line, idx) => (
-                          <p key={idx} className={`text-gray-700 text-sm mb-2 ${idx === 2 ? 'font-semibold text-red-700' : ''}`}>{line}</p>
+                          <p key={idx} className={`text-gray-700 text-base leading-relaxed mb-2 ${idx === 2 ? 'font-semibold text-red-700' : ''}`}>{line}</p>
                         ))}
                       </div>
                     </div>
@@ -132,18 +132,18 @@ export default function MotivationSection() {
                   <div className="bg-orange-50 p-4 rounded-lg">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-orange-600">{budgetPersonAmount}</div>
-                      <div className="text-sm text-gray-600">{budgetPersonLabel}</div>
+                      <div className="text-base text-gray-600">{budgetPersonLabel}</div>
                     </div>
                   </div>
                   
                   <div className="bg-orange-50 p-4 rounded-lg">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-orange-600">{budgetFamilyAmount}</div>
-                      <div className="text-sm text-gray-600">{budgetFamilyLabel}</div>
+                      <div className="text-base text-gray-600">{budgetFamilyLabel}</div>
                     </div>
                   </div>
                   
-                  <div className="text-center text-xs text-gray-500">
+                  <div className="text-center text-base text-gray-500">
                     <Users className="h-4 w-4 inline mr-1" />
                     {budgetPopulation}
                   </div>
@@ -169,7 +169,7 @@ export default function MotivationSection() {
                     <Clock className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
                     <div>
                       <p className="font-semibold text-yellow-800">{failurePastTitle}</p>
-                      <p className="text-gray-700 text-sm">{failurePastContent}</p>
+                      <p className="text-gray-700 text-base leading-relaxed">{failurePastContent}</p>
                     </div>
                   </div>
                   
@@ -177,7 +177,7 @@ export default function MotivationSection() {
                     <TrendingDown className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
                     <div>
                       <p className="font-semibold text-yellow-800">{failurePresentTitle}</p>
-                      <p className="text-gray-700 text-sm">{failurePresentContent}</p>
+                      <p className="text-gray-700 text-base leading-relaxed">{failurePresentContent}</p>
                     </div>
                   </div>
                   
@@ -185,7 +185,7 @@ export default function MotivationSection() {
                     <AlertTriangle className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
                     <div>
                       <p className="font-semibold text-yellow-800">{failureFutureTitle}</p>
-                      <p className="text-gray-700 text-sm">{failureFutureContent}</p>
+                      <p className="text-gray-700 text-base leading-relaxed">{failureFutureContent}</p>
                     </div>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ export default function MotivationSection() {
                   <span className="text-2xl font-bold text-green-600">1</span>
                 </div>
                 <h5 className="font-semibold text-green-800 mb-2">의회 정상 기능</h5>
-                <p className="text-sm text-gray-600">군민 대표의 정당한 심의 결과</p>
+                <p className="text-base text-gray-600 leading-relaxed">군민 대표의 정당한 심의 결과</p>
               </div>
               
               <div className="text-center">
@@ -215,7 +215,7 @@ export default function MotivationSection() {
                   <span className="text-2xl font-bold text-yellow-600">2</span>
                 </div>
                 <h5 className="font-semibold text-yellow-800 mb-2">집행부 독단</h5>
-                <p className="text-sm text-gray-600">의회 결정 무시, 위법 소지 지적</p>
+                <p className="text-base text-gray-600 leading-relaxed">의회 결정 무시, 위법 소지 지적</p>
               </div>
               
               <div className="text-center">
@@ -223,7 +223,7 @@ export default function MotivationSection() {
                   <span className="text-2xl font-bold text-orange-600">3</span>
                 </div>
                 <h5 className="font-semibold text-orange-800 mb-2">3:2 표결 통과</h5>
-                <p className="text-sm text-gray-600">논란 끝에 소수 의견으로 강행</p>
+                <p className="text-base text-gray-600 leading-relaxed">논란 끝에 소수 의견으로 강행</p>
               </div>
               
               <div className="text-center">
@@ -231,7 +231,7 @@ export default function MotivationSection() {
                   <span className="text-2xl font-bold text-red-600">4</span>
                 </div>
                 <h5 className="font-semibold text-red-800 mb-2">지방 독재화</h5>
-                <p className="text-sm text-gray-600">권위적 행정 반복 → 군민의 힘으로만 교정 가능</p>
+                <p className="text-base text-gray-600 leading-relaxed">권위적 행정 반복 → 군민의 힘으로만 교정 가능</p>
               </div>
             </div>
           </CardContent>
