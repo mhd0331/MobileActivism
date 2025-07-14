@@ -1,17 +1,17 @@
+import { AlertTriangle, DollarSign, TrendingDown, Scale, Users, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, DollarSign, TrendingDown, Scale, Users, Clock } from "lucide-react";
 import { useContentText } from "@/hooks/useWebContent";
 
 export default function MotivationSection() {
-  // Get content from database
-  const sectionTitle = useContentText("motivation", "section_title", "왜 서명해야 할까요?");
-  const sectionSubtitle = useContentText("motivation", "section_subtitle", "민주주의와 군민의 권익을 지키기 위한 세 가지 핵심 이유");
-  
+  // 섹션 제목과 부제목
+  const sectionTitle = useContentText("motivation", "section_title", "왜 전망대 건설을 반대해야 할까요?");
+  const sectionSubtitle = useContentText("motivation", "section_subtitle", "진안군민의 미래를 위한 합리적 선택이 필요합니다");
+
   // 민주주의 위기 카드 콘텐츠
   const democracyCrisisTitle = useContentText("motivation", "democracy_crisis_title", "민주주의 위기");
-  const democracyCrisisSubtitle = useContentText("motivation", "democracy_crisis_subtitle", "🛑 이것은 민주주의입니까, 독재입니까?");
-  const democracyPoint1Title = useContentText("motivation", "democracy_point1_title", "의회, 사업에 강한 반대 의견 표명");
+  const democracyCrisisSubtitle = useContentText("motivation", "democracy_crisis_subtitle", "🚨 이것은 민주주의입니까?");
+  const democracyPoint1Title = useContentText("motivation", "democracy_point1_title", "의회, 사업 반대");
   const democracyPoint1Content = useContentText("motivation", "democracy_point1_content", "295회 군의회에서 용역비 집행을 사업추진의 기본적인 타당성 확보 이후로 조건부 부결");
   const democracyPoint2Title = useContentText("motivation", "democracy_point2_title", "군수, 독단 강행");
   const democracyPoint2Content = useContentText("motivation", "democracy_point2_content", "의회의 반대 의견을 무릅쓰고 집행부 pool 예산을 사용하여 사업 강행\n지방자치법 제 55조를 위반하여 안건을 군의회에 사전 제출하지 않음");
@@ -48,26 +48,27 @@ export default function MotivationSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* 민주주의 위기 */}
-          <Card className="border-l-4 border-red-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <div className="bg-red-100 rounded-full p-3 mr-4">
-                  <Scale className="h-8 w-8 text-red-600" />
+        <div className="space-y-8">
+          {/* 민주주의 위기 - 큰 화면에서 전체 폭 사용 */}
+          <div className="w-full">
+            <Card className="border-l-4 border-red-500 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <div className="bg-red-100 rounded-full p-3 mr-4">
+                    <Scale className="h-8 w-8 text-red-600" />
+                  </div>
+                  <div>
+                    <Badge variant="destructive" className="mb-2">긴급</Badge>
+                    <h4 className="text-xl font-bold text-gray-900">{democracyCrisisTitle}</h4>
+                  </div>
                 </div>
-                <div>
-                  <Badge variant="destructive" className="mb-2">긴급</Badge>
-                  <h4 className="text-xl font-bold text-gray-900">{democracyCrisisTitle}</h4>
-                </div>
-              </div>
-              
-              <div className="space-y-6">
-                <div className="text-center mb-4">
+                
+                <div className="text-center mb-6">
                   <h5 className="text-xl font-bold text-red-800 mb-2">{democracyCrisisSubtitle}</h5>
                 </div>
                 
-                <div className="space-y-4">
+                {/* 큰 화면에서는 3개 포인트를 가로로 배치 */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
                     <div className="flex items-start">
                       <div className="bg-red-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1 flex-shrink-0">
@@ -108,90 +109,93 @@ export default function MotivationSection() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* 혈세 폭탄 */}
-          <Card className="border-l-4 border-orange-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <div className="bg-orange-100 rounded-full p-3 mr-4">
-                  <DollarSign className="h-8 w-8 text-orange-600" />
-                </div>
-                <div>
-                  <Badge className="bg-orange-100 text-orange-800 mb-2">경제적 부담</Badge>
-                  <h4 className="text-xl font-bold text-gray-900">{budgetWasteTitle}</h4>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-orange-600">{budgetPersonAmount}</div>
-                    <div className="text-sm text-gray-600">{budgetPersonLabel}</div>
+          {/* 예산낭비와 실패위험 - 큰 화면에서 좌우 배치, 작은 화면에서 세로 배치 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* 혈세 폭탄 */}
+            <Card className="border-l-4 border-orange-500 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <div className="bg-orange-100 rounded-full p-3 mr-4">
+                    <DollarSign className="h-8 w-8 text-orange-600" />
+                  </div>
+                  <div>
+                    <Badge className="bg-orange-100 text-orange-800 mb-2">경제적 부담</Badge>
+                    <h4 className="text-xl font-bold text-gray-900">{budgetWasteTitle}</h4>
                   </div>
                 </div>
                 
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-orange-600">{budgetFamilyAmount}</div>
-                    <div className="text-sm text-gray-600">{budgetFamilyLabel}</div>
+                <div className="space-y-4">
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-orange-600">{budgetPersonAmount}</div>
+                      <div className="text-sm text-gray-600">{budgetPersonLabel}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-orange-600">{budgetFamilyAmount}</div>
+                      <div className="text-sm text-gray-600">{budgetFamilyLabel}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center text-xs text-gray-500">
+                    <Users className="h-4 w-4 inline mr-1" />
+                    {budgetPopulation}
                   </div>
                 </div>
-                
-                <div className="text-center text-xs text-gray-500">
-                  <Users className="h-4 w-4 inline mr-1" />
-                  {budgetPopulation}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* 실패 위험성 */}
-          <Card className="border-l-4 border-yellow-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <div className="bg-yellow-100 rounded-full p-3 mr-4">
-                  <TrendingDown className="h-8 w-8 text-yellow-600" />
-                </div>
-                <div>
-                  <Badge className="bg-yellow-100 text-yellow-800 mb-2">위험 경고</Badge>
-                  <h4 className="text-xl font-bold text-gray-900">{environmentTitle}</h4>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <Clock className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
+            {/* 실패 위험성 */}
+            <Card className="border-l-4 border-yellow-500 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <div className="bg-yellow-100 rounded-full p-3 mr-4">
+                    <TrendingDown className="h-8 w-8 text-yellow-600" />
+                  </div>
                   <div>
-                    <p className="font-semibold text-yellow-800">{failurePastTitle}</p>
-                    <p className="text-gray-700 text-sm">{failurePastContent}</p>
+                    <Badge className="bg-yellow-100 text-yellow-800 mb-2">위험 경고</Badge>
+                    <h4 className="text-xl font-bold text-gray-900">{environmentTitle}</h4>
                   </div>
                 </div>
                 
-                <div className="flex items-start">
-                  <TrendingDown className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-yellow-800">{failurePresentTitle}</p>
-                    <p className="text-gray-700 text-sm">{failurePresentContent}</p>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <Clock className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-yellow-800">{failurePastTitle}</p>
+                      <p className="text-gray-700 text-sm">{failurePastContent}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <TrendingDown className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-yellow-800">{failurePresentTitle}</p>
+                      <p className="text-gray-700 text-sm">{failurePresentContent}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-yellow-800">{failureFutureTitle}</p>
+                      <p className="text-gray-700 text-sm">{failureFutureContent}</p>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-yellow-800">{failureFutureTitle}</p>
-                    <p className="text-gray-700 text-sm">{failureFutureContent}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* 민주주의 붕괴 과정 인포그래픽 */}
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-0">
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-0 mt-8">
           <CardContent className="p-8">
             <h4 className="text-2xl font-bold text-center text-gray-900 mb-8">
               📉 민주주의 붕괴의 과정
