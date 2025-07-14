@@ -32,9 +32,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }),
     cookie: {
       secure: false, // Set to true in production with HTTPS
-      httpOnly: false, // Allow JS access for debugging
+      httpOnly: true, // Secure cookie handling
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax' // Better cookie handling
+      sameSite: false // Disable sameSite for debugging
     }
   }));
 
@@ -113,6 +113,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('GET /api/me - Session ID:', req.sessionID);
     console.log('GET /api/me - Session contents:', req.session);
     console.log('GET /api/me - Session userId:', req.session.userId);
+    console.log('GET /api/me - Request headers:', {
+      cookie: req.headers.cookie,
+      userAgent: req.headers['user-agent'],
+      origin: req.headers.origin,
+      referer: req.headers.referer
+    });
     
     if (!req.session.userId) {
       return res.status(401).json({ message: "Not authenticated" });
