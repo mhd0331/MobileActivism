@@ -32,9 +32,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }),
     cookie: {
       secure: false, // Set to true in production with HTTPS
-      httpOnly: true, // Secure cookie handling
+      httpOnly: false, // Allow JS access for debugging
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: false // Disable sameSite for debugging
+      sameSite: 'lax', // Standard setting
+      domain: undefined // Let browser handle domain
     }
   }));
 
@@ -89,9 +90,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           console.log('Session saved successfully');
           console.log('Final session state:', req.session);
-          // Set proper headers to ensure cookie is sent
-          res.setHeader('Set-Cookie', res.getHeader('Set-Cookie') || []);
-          res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
+          
+          // Clear any existing cookies and set new one
+          res.clearCookie('connect.sid');
+          res.cookie('connect.sid', `s:${req.sessionID}`, {
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000,
+            httpOnly: false,
+            secure: false,
+            sameSite: 'lax'
+          });
+          
+          console.log(`Setting fresh cookie: s:${req.sessionID}`);
+          
+          res.json({ 
+            user: { id: user.id, name: user.name, phone: user.phone, district: user.district },
+            sessionId: req.sessionID // Debug info
+          });
         }
       });
     } catch (error) {

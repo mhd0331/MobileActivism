@@ -57,6 +57,16 @@ export function useLogin() {
       queryClient.invalidateQueries({ queryKey: ["/api/signatures/check"] });
       queryClient.invalidateQueries({ queryKey: ["/api/surveys"] });
       
+      // Clear old cookies and set new session
+      if (data.sessionId) {
+        console.log("Login successful with session ID:", data.sessionId);
+        // Clear any existing connect.sid cookies
+        document.cookie = "connect.sid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        // Set fresh session cookie with proper encoding
+        document.cookie = `connect.sid=s%3A${data.sessionId}; path=/; max-age=86400; samesite=lax`;
+        console.log("Cookie set manually:", document.cookie);
+      }
+      
       // Immediate and aggressive refetch of auth state
       console.log("Immediately refetching auth state...");
       queryClient.refetchQueries({ queryKey: ["/api/me"] });
@@ -64,6 +74,7 @@ export function useLogin() {
       // Also try multiple times to ensure success
       setTimeout(async () => {
         console.log("Refetching auth queries after login (attempt 1)...");
+        console.log("Current cookies:", document.cookie);
         const result = await queryClient.fetchQuery({ queryKey: ["/api/me"] });
         console.log("Auth refetch result (attempt 1):", result);
         if (!result) {
