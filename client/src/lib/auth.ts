@@ -54,19 +54,23 @@ export function useLogin() {
       queryClient.invalidateQueries({ queryKey: ["/api/signatures/check"] });
       queryClient.invalidateQueries({ queryKey: ["/api/surveys"] });
       
-      // Force immediate refetch of auth state with a longer delay for session sync
+      // Immediate and aggressive refetch of auth state
+      console.log("Immediately refetching auth state...");
+      queryClient.refetchQueries({ queryKey: ["/api/me"] });
+      
+      // Also try multiple times to ensure success
       setTimeout(async () => {
-        console.log("Refetching auth queries after login...");
+        console.log("Refetching auth queries after login (attempt 1)...");
         const result = await queryClient.fetchQuery({ queryKey: ["/api/me"] });
-        console.log("Auth refetch result:", result);
+        console.log("Auth refetch result (attempt 1):", result);
         if (!result) {
           console.warn("Auth refetch failed, trying again...");
           setTimeout(async () => {
             const retryResult = await queryClient.fetchQuery({ queryKey: ["/api/me"] });
-            console.log("Auth retry result:", retryResult);
-          }, 500);
+            console.log("Auth retry result (attempt 2):", retryResult);
+          }, 1000);
         }
-      }, 500); // Increased delay for session propagation
+      }, 100);
     },
   });
 }
