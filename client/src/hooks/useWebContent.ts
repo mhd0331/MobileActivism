@@ -9,6 +9,8 @@ export function useWebContent(section?: string) {
       apiRequest(
         section ? `/api/web-content?section=${section}` : "/api/web-content"
       ),
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 1000 * 60, // Keep in cache for 1 minute
   });
 }
 
@@ -18,7 +20,8 @@ export function useWebContentByKey(section: string, key: string) {
     queryFn: () => apiRequest(`/api/web-content/${section}/${key}`),
     enabled: !!(section && key),
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 1000 * 60, // Keep in cache for 1 minute
   });
 }
 
@@ -33,7 +36,19 @@ export function useCreateWebContent() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
+      // Invalidate and refetch all web content queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === "/api/web-content";
+        }
+      });
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === "/api/web-content";
+        }
+      });
     },
   });
 }
@@ -49,9 +64,15 @@ export function useUpdateWebContent() {
       });
     },
     onSuccess: () => {
-      // Invalidate all web content queries to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
+      // Invalidate all web content queries to ensure fresh data everywhere
       queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === "/api/web-content";
+        }
+      });
+      // Force refetch for all web content queries
+      queryClient.refetchQueries({
         predicate: (query) => {
           return Array.isArray(query.queryKey) && 
                  query.queryKey[0] === "/api/web-content";
@@ -71,7 +92,19 @@ export function useDeleteWebContent() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
+      // Invalidate and refetch all web content queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === "/api/web-content";
+        }
+      });
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === "/api/web-content";
+        }
+      });
     },
   });
 }
