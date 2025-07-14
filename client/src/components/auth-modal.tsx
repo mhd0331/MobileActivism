@@ -51,7 +51,10 @@ export default function AuthModal({ open, onOpenChange, onSuccess }: AuthModalPr
     }
 
     try {
-      await login.mutateAsync({ name, phone, district });
+      console.log("AuthModal: Starting login process");
+      const result = await login.mutateAsync({ name, phone, district });
+      console.log("AuthModal: Login mutation result:", result);
+      
       toast({
         title: "로그인 성공",
         description: "안전하게 로그인되었습니다.",
@@ -61,11 +64,13 @@ export default function AuthModal({ open, onOpenChange, onSuccess }: AuthModalPr
       setDistrict("");
       onOpenChange(false);
       
+      console.log("AuthModal: Calling success callback");
       // Call success callback if provided
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
+      console.error("AuthModal: Login error:", error);
       toast({
         title: "로그인 실패",
         description: "로그인 중 오류가 발생했습니다. 다시 시도해주세요.",

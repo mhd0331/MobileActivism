@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import bcrypt from "bcryptjs";
+import MemoryStore from "memorystore";
 import { storage } from "./storage";
 import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdminUserSchema, insertNoticeSchema, insertResourceSchema, insertWebContentSchema } from "@shared/schema";
 import { z } from "zod";
@@ -17,14 +18,20 @@ declare module 'express-session' {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session configuration
+  const Store = MemoryStore(session);
+  
   app.use(session({
-    secret: process.env.SESSION_SECRET || 'default-secret-change-in-production',
+    secret: process.env.SESSION_SECRET || 'jinan-campaign-secret-key',
     resave: false,
     saveUninitialized: false,
+    store: new Store({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }),
     cookie: {
       secure: false, // Set to true in production with HTTPS
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax' // Better cookie handling
     }
   }));
 
@@ -68,17 +75,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.userId = user.id;
       console.log('Session set with userId:', user.id);
       console.log('Session ID:', req.sessionID);
+      console.log('Session contents:', req.session);
       
-      // Force save session
+      // Force save session and wait for completion
       req.session.save((err) => {
         if (err) {
           console.error('Session save error:', err);
+          return res.status(500).json({ message: "Session save failed" });
         } else {
           console.log('Session saved successfully');
+          res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
         }
       });
-      
-      res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
     } catch (error) {
       console.error('Login error:', error);
       res.status(400).json({ message: "Invalid user data" });
@@ -95,6 +103,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/me", async (req, res) => {
+    console.log('GET /api/me - Session ID:', req.sessionID);
+    console.log('GET /api/me - Session contents:', req.session);
+    console.log('GET /api/me - Session userId:', req.session.userId);
+    
     if (!req.session.userId) {
       return res.status(401).json({ message: "Not authenticated" });
     }
