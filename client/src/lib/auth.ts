@@ -37,7 +37,10 @@ export function useLogin() {
       return response;
     },
     onSuccess: () => {
+      // Force invalidate and refetch user data
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      queryClient.refetchQueries({ queryKey: ["/api/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/signatures/check"] });
     },
   });
 }

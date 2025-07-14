@@ -65,7 +65,7 @@ export default function SurveySection() {
   });
 
   // Check if user is logged in
-  const { data: currentUser } = useQuery({
+  const { data: currentUser, refetch: refetchUser } = useQuery({
     queryKey: ["/api/me"],
     retry: false,
   });
@@ -165,7 +165,7 @@ export default function SurveySection() {
     if (!survey) return;
 
     // Check if user is logged in first
-    if (!currentUser) {
+    if (!currentUser?.user) {
       setPendingSubmission(true);
       setShowAuthModal(true);
       return;
@@ -185,14 +185,31 @@ export default function SurveySection() {
   };
 
   // Handle successful login - submit pending survey if needed
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = async () => {
     setShowAuthModal(false);
-    if (pendingSubmission) {
-      setPendingSubmission(false);
-      // Retry submission after successful login
-      setTimeout(() => {
-        handleSubmit();
-      }, 500);
+    
+    // Refetch user data to update authentication state
+    try {
+      await refetchUser();
+      
+      if (pendingSubmission) {
+        setPendingSubmission(false);
+        // Wait a moment for user state to update, then retry submission
+        setTimeout(() => {
+          handleSubmit();
+        }, 1000);
+      } else {
+        toast({
+          title: "로그인 완료",
+          description: "성공적으로 로그인되었습니다.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "로그인 완료",
+        description: "로그인이 완료되었습니다. 여론조사 제출 버튼을 다시 눌러주세요.",
+        duration: 5000,
+      });
     }
   };
 
