@@ -16,9 +16,9 @@ export default function Navigation({ currentSection, onSectionChange }: Navigati
   ];
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-40 border-b">
+    <nav className="bg-white shadow-md sticky top-0 z-40 border-b-2 border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex space-x-2 sm:space-x-8 overflow-x-auto">
+        <div className="flex justify-center sm:justify-start space-x-1 sm:space-x-4 md:space-x-8 overflow-x-auto scrollbar-hide">
           {sections.map((section) => {
             const Icon = section.icon;
             return (
@@ -26,15 +26,14 @@ export default function Navigation({ currentSection, onSectionChange }: Navigati
                 key={section.id}
                 variant="ghost"
                 onClick={() => onSectionChange(section.id)}
-                className={`flex items-center px-3 sm:px-4 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                className={`flex flex-col sm:flex-row items-center justify-center px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-base md:text-lg font-semibold border-b-3 transition-all duration-300 whitespace-nowrap min-w-[70px] sm:min-w-[120px] hover:bg-blue-50 ${
                   currentSection === section.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    ? "border-primary text-primary bg-blue-50 shadow-sm"
+                    : "border-transparent text-gray-600 hover:text-primary hover:border-primary/30"
                 }`}
               >
-                <Icon className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">{section.label}</span>
-                <span className="sm:hidden">{section.label.split(" ")[0]}</span>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="text-xs sm:text-base font-medium leading-tight">{section.label}</span>
               </Button>
             );
           })}
