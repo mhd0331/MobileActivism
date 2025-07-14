@@ -217,10 +217,25 @@ export default function SurveySection() {
     });
   };
 
-  // Handle successful login - same as signature section
+  // Handle successful login - exactly same as signature section
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
-    handleSubmit(); // Try submitting again after successful login
+    // Attempt submission after successful login with delay (same as signature)
+    setTimeout(() => {
+      if (!survey) return;
+      
+      // Prepare answers for submission
+      const submissionAnswers = Object.entries(answers).map(([questionId, value]) => ({
+        questionId: parseInt(questionId),
+        answerValue: typeof value === 'string' ? value : null,
+        selectedOptions: Array.isArray(value) ? value : null
+      }));
+
+      submitSurveyMutation.mutate({
+        surveyId: survey.id,
+        answers: submissionAnswers
+      });
+    }, 500);
   };
 
   const isCurrentAnswered = currentQuestion ? 
