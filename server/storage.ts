@@ -83,6 +83,7 @@ export interface IStorage {
   createSurveyResponse(response: InsertSurveyResponse): Promise<SurveyResponse>;
   getSurveyResponses(surveyId: number): Promise<SurveyResponse[]>;
   createSurveyAnswer(answer: InsertSurveyAnswer): Promise<SurveyAnswer>;
+  checkUserSurveyResponse(surveyId: number, userId: number): Promise<boolean>;
   
   // Survey Analytics
   getSurveyResults(surveyId: number): Promise<{
@@ -393,6 +394,19 @@ export class DatabaseStorage implements IStorage {
   async createSurveyAnswer(insertAnswer: InsertSurveyAnswer): Promise<SurveyAnswer> {
     const [answer] = await db.insert(surveyAnswers).values(insertAnswer).returning();
     return answer;
+  }
+
+  async checkUserSurveyResponse(surveyId: number, userId: number): Promise<boolean> {
+    const [response] = await db
+      .select()
+      .from(surveyResponses)
+      .where(and(
+        eq(surveyResponses.surveyId, surveyId),
+        eq(surveyResponses.userId, userId)
+      ))
+      .limit(1);
+    
+    return !!response;
   }
 
   // Survey Analytics Implementation
