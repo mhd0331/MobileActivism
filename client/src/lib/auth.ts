@@ -23,9 +23,12 @@ export function useAuth() {
     queryKey: ["/api/me"],
     retry: false,
     staleTime: 0, // Always fetch fresh data for auth state
+    gcTime: 0, // Don't cache
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
   
-  console.log("useAuth query result:", { data: query.data, isLoading: query.isLoading, error: query.error });
+  console.log("useAuth query result:", { data: query.data, isLoading: query.isLoading, error: query.error, cookies: document.cookie });
   return query;
 }
 

@@ -15,14 +15,18 @@ export async function apiRequest(
   console.log(`Making ${method} request to ${url}`, data ? { data } : {});
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache"
+    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
   console.log(`Response from ${method} ${url}:`, {
     status: res.status,
     statusText: res.statusText,
-    headers: Object.fromEntries(res.headers.entries())
+    headers: Object.fromEntries(res.headers.entries()),
+    cookies: document.cookie
   });
 
   return res;
