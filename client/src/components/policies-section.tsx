@@ -41,13 +41,12 @@ export default function PoliciesSection() {
   const { data: auth } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedCategory, setSelectedCategory] = useState("all");
+
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
 
   const { data: policies, isLoading } = useQuery({
-    queryKey: ["/api/policies", selectedCategory],
-    queryParams: selectedCategory !== "all" ? { category: selectedCategory } : undefined,
+    queryKey: ["/api/policies/all"],
   });
 
   const supportMutation = useMutation({
@@ -95,10 +94,7 @@ export default function PoliciesSection() {
     setShowPolicyModal(true);
   };
 
-  const categories = [
-    { id: "all", label: "전체" },
-    ...Object.entries(categoryLabels).map(([id, label]) => ({ id, label })),
-  ];
+
 
   return (
     <>
@@ -111,25 +107,6 @@ export default function PoliciesSection() {
               새 제안 작성
             </Button>
           </div>
-
-          {/* 정책 카테고리 필터 */}
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(category.id)}
-                    className="text-sm"
-                  >
-                    {category.label}
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
 
           {/* 정책 제안 목록 */}
           {isLoading ? (

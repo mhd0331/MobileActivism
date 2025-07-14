@@ -144,19 +144,7 @@ export default function PolicyModal({ open, onOpenChange }: PolicyModalProps) {
             />
           </div>
           
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="flex items-start">
-              <InfoIcon className="h-5 w-5 text-primary mt-0.5 mr-2 flex-shrink-0" />
-              <div className="text-sm text-gray-700">
-                <p className="font-medium">작성 가이드</p>
-                <ul className="mt-1 list-disc list-inside space-y-1">
-                  <li>구체적이고 실현 가능한 정책을 제안해주세요</li>
-                  <li>예상 예산이나 실행 방법을 포함하면 더 좋습니다</li>
-                  <li>건전한 토론 문화를 위해 예의를 지켜주세요</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+
           
           <div className="flex space-x-3 pt-4">
             <Button
