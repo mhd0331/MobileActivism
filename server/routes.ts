@@ -2,7 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import bcrypt from "bcryptjs";
-import MemoryStore from "memorystore";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 import { storage } from "./storage";
 import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdminUserSchema, insertNoticeSchema, insertResourceSchema, insertWebContentSchema } from "@shared/schema";
 import { z } from "zod";
@@ -17,21 +18,23 @@ declare module 'express-session' {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Session configuration
-  const Store = MemoryStore(session);
+  // Session configuration with PostgreSQL store
+  const PgStore = connectPgSimple(session);
   
   app.use(session({
     secret: process.env.SESSION_SECRET || 'jinan-campaign-secret-key',
-    resave: true, // Force session save even if not modified
-    saveUninitialized: true, // Save uninitialized sessions
-    store: new Store({
-      checkPeriod: 86400000 // prune expired entries every 24h
+    resave: false, // Don't force session save
+    saveUninitialized: false, // Don't save uninitialized sessions
+    store: new PgStore({
+      pool: pool,
+      tableName: 'sessions',
+      createTableIfMissing: true,
     }),
     cookie: {
       secure: false, // Set to true in production with HTTPS
       httpOnly: false, // Allow JS access for debugging
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'none' // Allow cross-origin cookies for debugging
+      sameSite: 'lax' // Better cookie handling
     }
   }));
 
