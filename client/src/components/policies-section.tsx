@@ -162,7 +162,16 @@ export default function PoliciesSection() {
         </div>
       </section>
       
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal}
+        onSuccess={() => {
+          // Reopen policy modal after successful login
+          setTimeout(() => {
+            setShowPolicyModal(true);
+          }, 100);
+        }}
+      />
       <PolicyModal 
         open={showPolicyModal} 
         onOpenChange={setShowPolicyModal}

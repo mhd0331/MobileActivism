@@ -31,11 +31,12 @@ export function useLogin() {
   
   return useMutation({
     mutationFn: async (data: LoginData) => {
-      const response = await apiRequest("/api/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-      return response;
+      const response = await apiRequest("POST", "/api/login", data);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       // Force invalidate and refetch user data immediately
@@ -51,10 +52,12 @@ export function useLogout() {
   
   return useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("/api/logout", {
-        method: "POST",
-      });
-      return response;
+      const response = await apiRequest("POST", "/api/logout");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
