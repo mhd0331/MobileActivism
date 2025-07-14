@@ -49,7 +49,11 @@ export default function AdminPage() {
   });
   const policies = policiesData.policies || [];
 
-  const { data: webContent = [] } = useWebContent();
+  const { data: webContentResponse } = useQuery({
+    queryKey: ['/api/web-content'],
+    enabled: isAuthenticated,
+  });
+  const webContent = webContentResponse?.content || [];
   
   const createWebContentMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -436,42 +440,50 @@ export default function AdminPage() {
                 {/* Content List */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">등록된 콘텐츠</h3>
-                  {webContent?.content?.filter((item: any) => item.section !== 'signature')?.map((item: any) => (
-                    <Card key={item.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                          <div className="space-y-2 flex-1">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline">{item.section}</Badge>
-                              <Badge variant="secondary">{item.key}</Badge>
+                  {Array.isArray(webContent) ? (
+                    webContent.filter((item: any) => !item.section?.includes('signature')).length > 0 ? (
+                      webContent.filter((item: any) => !item.section?.includes('signature')).map((item: any) => (
+                        <Card key={item.id}>
+                          <CardContent className="pt-6">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <Badge variant="outline">{item.section}</Badge>
+                                  <Badge variant="secondary">{item.key}</Badge>
+                                </div>
+                                {item.title && <h4 className="font-medium">{item.title}</h4>}
+                                <p className="text-sm text-gray-600 line-clamp-2">{item.content}</p>
+                                <p className="text-xs text-gray-400">
+                                  등록: {format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                                </p>
+                              </div>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEditingContent(item)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => deleteWebContentMutation.mutate(item.id)}
+                                  disabled={deleteWebContentMutation.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                            {item.title && <h4 className="font-medium">{item.title}</h4>}
-                            <p className="text-sm text-gray-600 line-clamp-2">{item.content}</p>
-                            <p className="text-xs text-gray-400">
-                              등록: {format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
-                            </p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingContent(item)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => deleteWebContentMutation.mutate(item.id)}
-                              disabled={deleteWebContentMutation.isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">등록된 콘텐츠가 없습니다. "콘텐츠 초기화" 버튼을 눌러 기본 콘텐츠를 생성하세요.</p>
+                    )
+                  ) : (
+                    <p className="text-center text-gray-500 py-8">콘텐츠를 불러오는 중...</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
