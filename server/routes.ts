@@ -135,8 +135,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       referer: req.headers.referer
     });
     
+    // If session exists but has no userId, destroy it and create fresh session
     if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
+      req.session.destroy((err) => {
+        if (err) console.error('Session destroy error:', err);
+        // Clear the cookie to force browser to get new session
+        res.clearCookie('connect.sid');
+        return res.status(401).json({ message: "Not authenticated" });
+      });
+      return;
     }
     
     const user = await storage.getUser(req.session.userId);
