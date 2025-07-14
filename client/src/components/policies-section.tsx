@@ -52,6 +52,10 @@ export default function PoliciesSection() {
   const supportMutation = useMutation({
     mutationFn: async (policyId: number) => {
       const response = await apiRequest("POST", `/api/policies/${policyId}/support`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
+      }
       return response.json();
     },
     onSuccess: () => {

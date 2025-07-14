@@ -54,7 +54,14 @@ export default function PolicyModal({ open, onOpenChange, onAuthRequired }: Poli
 
   const createPolicyMutation = useMutation({
     mutationFn: async (data: { category: string; title: string; content: string }) => {
+      console.log("Sending policy data:", data);
       const response = await apiRequest("POST", "/api/policies", data);
+      console.log("Policy response status:", response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Policy creation failed:", errorText);
+        throw new Error(`${response.status}: ${errorText}`);
+      }
       return response.json();
     },
     onSuccess: () => {
