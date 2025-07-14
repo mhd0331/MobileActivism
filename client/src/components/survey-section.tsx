@@ -57,19 +57,6 @@ export default function SurveySection() {
     retry: false,
   });
 
-  // Check if user has already submitted response
-  const { data: submissionCheck } = useQuery({
-    queryKey: ["/api/surveys", survey?.id, "check"],
-    queryFn: async () => {
-      if (!survey?.id) return null;
-      const response = await fetch(`/api/surveys/${survey.id}/check`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    enabled: !!survey?.id && !!currentUser?.user,
-    staleTime: 0,
-  });
-
   // Fetch survey results
   const { data: results, isLoading: resultsLoading } = useQuery<SurveyResults>({
     queryKey: ["/api/surveys/results"],
@@ -82,6 +69,19 @@ export default function SurveySection() {
     queryKey: ["/api/me"],
     retry: false,
     staleTime: 0, // Always fetch fresh data for auth state
+  });
+
+  // Check if user has already submitted response
+  const { data: submissionCheck } = useQuery({
+    queryKey: ["/api/surveys", survey?.id, "check"],
+    queryFn: async () => {
+      if (!survey?.id) return null;
+      const response = await fetch(`/api/surveys/${survey.id}/check`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!survey?.id && !!currentUser?.user,
+    staleTime: 0,
   });
 
   // Submit survey response
