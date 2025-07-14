@@ -490,6 +490,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if user has already submitted survey response
+  app.get("/api/surveys/:surveyId/check", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const surveyId = parseInt(req.params.surveyId);
+      const hasSubmitted = await storage.checkUserSurveyResponse(surveyId, req.session.userId);
+      res.json({ hasSubmitted });
+    } catch (error) {
+      console.error("Error checking survey response:", error);
+      res.status(500).json({ message: "Failed to check survey response" });
+    }
+  });
+
   app.post("/api/surveys/responses", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
@@ -498,6 +514,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!surveyId || !answers || !Array.isArray(answers)) {
         return res.status(400).json({ message: "Invalid request data" });
       }
+
+      // Delete existing response if user has already submitted
+      await storage.deleteUserSurveyResponse(parseInt(surveyId), userId);
 
       // Get user's IP and user agent for analytics
       const ipAddress = req.ip || req.connection.remoteAddress;

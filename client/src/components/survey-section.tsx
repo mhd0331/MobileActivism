@@ -57,6 +57,19 @@ export default function SurveySection() {
     retry: false,
   });
 
+  // Check if user has already submitted response
+  const { data: submissionCheck } = useQuery({
+    queryKey: ["/api/surveys", survey?.id, "check"],
+    queryFn: async () => {
+      if (!survey?.id) return null;
+      const response = await fetch(`/api/surveys/${survey.id}/check`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!survey?.id && !!currentUser?.user,
+    staleTime: 0,
+  });
+
   // Fetch survey results
   const { data: results, isLoading: resultsLoading } = useQuery<SurveyResults>({
     queryKey: ["/api/surveys/results"],
@@ -84,7 +97,9 @@ export default function SurveySection() {
       setPendingSubmission(false);
       toast({
         title: "성공",
-        description: "여론조사 응답이 제출되었습니다.",
+        description: submissionCheck?.hasSubmitted 
+          ? "이전 응답이 업데이트되었습니다." 
+          : "여론조사 응답이 제출되었습니다.",
       });
     },
     onError: (error: any) => {
@@ -429,6 +444,21 @@ export default function SurveySection() {
             <p className="text-xl text-gray-600 mb-6">
               {survey.description}
             </p>
+            
+            {submissionCheck?.hasSubmitted && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
+                <div className="flex items-start">
+                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <div className="text-sm text-left">
+                    <p className="font-medium text-blue-800">이미 참여하셨습니다</p>
+                    <p className="text-blue-700 mt-1">
+                      이전에 제출한 응답이 있습니다. 다시 참여하시면 이전 응답이 새로운 응답으로 교체됩니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="flex justify-center gap-4 mb-8">
               <Button
                 onClick={() => setShowResults(true)}

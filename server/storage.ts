@@ -84,6 +84,7 @@ export interface IStorage {
   getSurveyResponses(surveyId: number): Promise<SurveyResponse[]>;
   createSurveyAnswer(answer: InsertSurveyAnswer): Promise<SurveyAnswer>;
   checkUserSurveyResponse(surveyId: number, userId: number): Promise<boolean>;
+  deleteUserSurveyResponse(surveyId: number, userId: number): Promise<void>;
   
   // Survey Analytics
   getSurveyResults(surveyId: number): Promise<{
@@ -407,6 +408,32 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
     
     return !!response;
+  }
+
+  async deleteUserSurveyResponse(surveyId: number, userId: number): Promise<void> {
+    // First get the response to get the response ID
+    const existingResponse = await db
+      .select()
+      .from(surveyResponses)
+      .where(and(
+        eq(surveyResponses.surveyId, surveyId),
+        eq(surveyResponses.userId, userId)
+      ))
+      .limit(1);
+
+    if (existingResponse.length > 0) {
+      const responseId = existingResponse[0].id;
+      
+      // Delete associated answers first
+      await db
+        .delete(surveyAnswers)
+        .where(eq(surveyAnswers.responseId, responseId));
+      
+      // Then delete the response
+      await db
+        .delete(surveyResponses)
+        .where(eq(surveyResponses.id, responseId));
+    }
   }
 
   // Survey Analytics Implementation
