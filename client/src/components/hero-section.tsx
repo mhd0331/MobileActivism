@@ -55,7 +55,7 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
               onClick={() => handleButtonClick("policies")}
               size="lg"
               variant="outline"
-              className="border-white border-2 text-white hover:bg-white hover:text-blue-700 font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
+              className="border-white border-2 text-green-800 hover:bg-white hover:text-green-900 font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
             >
               <Lightbulb className="h-5 w-5 mr-2" />
               정책제안 바로가기
