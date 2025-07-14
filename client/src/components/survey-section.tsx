@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +46,9 @@ interface SurveyResults {
 }
 
 export default function SurveySection() {
+  const { data: auth } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [showResults, setShowResults] = useState(false);
@@ -85,13 +88,6 @@ export default function SurveySection() {
     retry: false,
   });
 
-  // Check if user is logged in
-  const { data: currentUser, refetch: refetchUser } = useQuery({
-    queryKey: ["/api/me"],
-    retry: false,
-    staleTime: 0, // Always fetch fresh data for auth state
-  });
-
   // Check if user has already submitted response
   const { data: submissionCheck } = useQuery({
     queryKey: ["/api/surveys", survey?.id, "check"],
@@ -101,9 +97,11 @@ export default function SurveySection() {
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!survey?.id && !!currentUser?.user,
+    enabled: !!survey?.id && !!auth?.user,
     staleTime: 0,
   });
+
+  const existingResponse = submissionCheck?.hasSubmitted;
 
   // Submit survey response
   const submitSurveyMutation = useMutation({
@@ -117,27 +115,24 @@ export default function SurveySection() {
     },
     onSuccess: () => {
       setIsSubmitted(true);
-      setPendingSubmission(false);
       toast({
         title: "성공",
         description: submissionCheck?.hasSubmitted 
           ? "이전 응답이 업데이트되었습니다." 
           : "여론조사 응답이 제출되었습니다.",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/surveys"] });
     },
     onError: (error: any) => {
-      if (error.message.includes("401") && !pendingSubmission) {
-        // Only show login modal if not already in pending submission state
-        setPendingSubmission(true);
+      if (error.message.includes("401")) {
         setShowAuthModal(true);
-      } else {
-        setPendingSubmission(false);
-        toast({
-          title: "오류",
-          description: error.message || "응답 제출에 실패했습니다.",
-          variant: "destructive",
-        });
+        return;
       }
+      toast({
+        title: "제출 실패",
+        description: "여론조사 제출 중 오류가 발생했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -203,9 +198,8 @@ export default function SurveySection() {
   const handleSubmit = async () => {
     if (!survey) return;
 
-    // Check if user is logged in first
-    if (!currentUser || !currentUser.user) {
-      setPendingSubmission(true);
+    // Check if user is logged in first (using auth from useAuth hook)
+    if (!auth?.user) {
       setShowAuthModal(true);
       return;
     }
@@ -217,80 +211,16 @@ export default function SurveySection() {
       selectedOptions: Array.isArray(value) ? value : null
     }));
 
-    try {
-      await submitSurveyMutation.mutateAsync({
-        surveyId: survey.id,
-        answers: submissionAnswers
-      });
-    } catch (error) {
-      console.error('Survey submission error:', error);
-    }
+    submitSurveyMutation.mutate({
+      surveyId: survey.id,
+      answers: submissionAnswers
+    });
   };
 
-  // Handle successful login - submit pending survey if needed
-  const handleAuthSuccess = async () => {
+  // Handle successful login - same as signature section
+  const handleAuthSuccess = () => {
     setShowAuthModal(false);
-    
-    if (pendingSubmission) {
-      setPendingSubmission(false);
-      
-      toast({
-        title: "로그인 완료",
-        description: "여론조사를 제출하는 중입니다...",
-      });
-      
-      // Refresh user data first, then submit
-      await refetchUser();
-      
-      // Wait a moment for auth state to update, then submit
-      setTimeout(async () => {
-        if (!survey) return;
-        
-        try {
-          // Prepare answers for submission
-          const submissionAnswers = Object.entries(answers).map(([questionId, value]) => ({
-            questionId: parseInt(questionId),
-            answerValue: typeof value === 'string' ? value : null,
-            selectedOptions: Array.isArray(value) ? value : null
-          }));
-
-          // Direct API call instead of using mutation to avoid the 401 error handling loop
-          const response = await fetch("/api/surveys/responses", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              surveyId: survey.id,
-              answers: submissionAnswers
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`제출 실패: ${response.status}`);
-          }
-
-          // Success - update UI
-          setIsSubmitted(true);
-          toast({
-            title: "성공",
-            description: "여론조사 응답이 제출되었습니다.",
-          });
-        } catch (error) {
-          console.error('Submit error after login:', error);
-          toast({
-            title: "제출 실패",
-            description: "여론조사 제출에 실패했습니다. 제출 버튼을 다시 눌러주세요.",
-            variant: "destructive",
-          });
-        }
-      }, 1500);
-    } else {
-      toast({
-        title: "로그인 완료",
-        description: "성공적으로 로그인되었습니다.",
-      });
-    }
+    handleSubmit(); // Try submitting again after successful login
   };
 
   const isCurrentAnswered = currentQuestion ? 
