@@ -157,3 +157,12 @@ Core entities include:
 - **Real-time Content Updates**: Survey page texts now dynamically load from database via individual API endpoints
 - **CMS Integration**: All survey content editable through admin CMS with immediate webpage reflection
 - **Content Categories**: Error states, results view, completion state, form navigation, authentication prompts
+
+### Complete Survey System Redesign (July 14, 2025)
+- **Elder-Friendly Questions**: Completely rewrote all 12 survey questions replacing technical terms ("앱/웹" → "핸드폰이나 컴퓨터")
+- **Content Focus Shift**: Changed from generic digital survey questions to Jinan County wooden observation tower specific questions
+- **Question Categories**: Added questions about tower construction opinion, opposition reasons, priority projects, digital literacy
+- **Database-Driven Text System**: All UI text (25+ elements) now stored in database and editable via CMS
+- **Complete Content Migration**: Every visible text element in survey section now reads from web_content table
+- **Real-time CMS Updates**: Survey page content immediately reflects changes made in admin panel
+- **Elderly Accessibility**: Improved question clarity and terminology for senior citizen understanding
