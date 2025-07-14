@@ -205,12 +205,20 @@ export default function SurveySection() {
   const handleSubmit = async () => {
     if (!survey) return;
 
+    // Wait for auth loading to complete
+    if (auth.isLoading) {
+      console.log("Auth is loading, waiting...");
+      return;
+    }
+
     // Check if user is logged in first (using auth from useAuth hook)
-    if (!auth?.user || auth.isLoading) {
+    if (!auth?.user) {
+      console.log("User not authenticated, showing login modal");
       setShowAuthModal(true);
       return;
     }
 
+    console.log("User authenticated, proceeding with submission");
     // Prepare answers for submission
     const submissionAnswers = Object.entries(answers).map(([questionId, value]) => ({
       questionId: parseInt(questionId),
@@ -233,20 +241,15 @@ export default function SurveySection() {
     
     // Attempt submission after successful login with delay (same as signature)
     setTimeout(() => {
+      console.log("Retrying submission after login success");
       // Re-check auth state before attempting submission
-      if (!survey || !auth?.user) return;
+      if (!survey) {
+        console.log("No survey available");
+        return;
+      }
       
-      // Prepare answers for submission
-      const submissionAnswers = Object.entries(answers).map(([questionId, value]) => ({
-        questionId: parseInt(questionId),
-        answerValue: typeof value === 'string' ? value : null,
-        selectedOptions: Array.isArray(value) ? value : null
-      }));
-
-      submitSurveyMutation.mutate({
-        surveyId: survey.id,
-        answers: submissionAnswers
-      });
+      // Force call handleSubmit again to go through proper auth check
+      handleSubmit();
     }, 1500); // Increased delay to allow auth state to update
   };
 
