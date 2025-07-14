@@ -17,9 +17,10 @@ import { jinanDistricts } from "@shared/schema";
 interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
+export default function AuthModal({ open, onOpenChange, onSuccess }: AuthModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [district, setDistrict] = useState("");
@@ -59,6 +60,11 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
       setPhone("");
       setDistrict("");
       onOpenChange(false);
+      
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       toast({
         title: "로그인 실패",

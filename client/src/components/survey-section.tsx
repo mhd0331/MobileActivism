@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle, Clock, Users, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import AuthModal from "@/components/auth-modal";
 
 interface SurveyQuestion {
   id: number;
@@ -47,6 +48,8 @@ export default function SurveySection() {
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [showResults, setShowResults] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingSubmission, setPendingSubmission] = useState(false);
 
   // Fetch active survey
   const { data: survey, isLoading: surveyLoading, error: surveyError } = useQuery({
@@ -61,6 +64,12 @@ export default function SurveySection() {
     retry: false,
   });
 
+  // Check if user is logged in
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
+
   // Submit survey response
   const submitSurveyMutation = useMutation({
     mutationFn: async (responseData: any) => {
@@ -71,6 +80,7 @@ export default function SurveySection() {
     },
     onSuccess: () => {
       setIsSubmitted(true);
+      setPendingSubmission(false);
       toast({
         title: "성공",
         description: "여론조사 응답이 제출되었습니다.",
@@ -78,12 +88,11 @@ export default function SurveySection() {
     },
     onError: (error: any) => {
       if (error.message.includes("401")) {
-        toast({
-          title: "로그인 필요",
-          description: "여론조사 참여를 위해 로그인이 필요합니다.",
-          variant: "destructive",
-        });
+        // Show login modal instead of error toast
+        setPendingSubmission(true);
+        setShowAuthModal(true);
       } else {
+        setPendingSubmission(false);
         toast({
           title: "오류",
           description: error.message || "응답 제출에 실패했습니다.",
@@ -155,6 +164,13 @@ export default function SurveySection() {
   const handleSubmit = async () => {
     if (!survey) return;
 
+    // Check if user is logged in first
+    if (!currentUser) {
+      setPendingSubmission(true);
+      setShowAuthModal(true);
+      return;
+    }
+
     // Prepare answers for submission
     const submissionAnswers = Object.entries(answers).map(([questionId, value]) => ({
       questionId: parseInt(questionId),
@@ -166,6 +182,17 @@ export default function SurveySection() {
       surveyId: survey.id,
       answers: submissionAnswers
     });
+  };
+
+  // Handle successful login - submit pending survey if needed
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    if (pendingSubmission) {
+      // Retry submission after successful login
+      setTimeout(() => {
+        handleSubmit();
+      }, 500);
+    }
   };
 
   const isCurrentAnswered = currentQuestion ? 
@@ -480,6 +507,13 @@ export default function SurveySection() {
           )}
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 }

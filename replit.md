@@ -134,3 +134,10 @@ Core entities include:
 - **Query Invalidation**: Enhanced cache invalidation with comprehensive refetch mechanisms
 - **Live Updates**: CMS modifications now instantly reflect on webpage without browser refresh
 - **Data Flow Optimization**: Streamlined database → API → frontend cache → UI rendering pipeline
+
+### Survey System UX Enhancement (July 14, 2025)
+- **Smart Login Flow**: Survey submission now automatically triggers login modal when user is not authenticated
+- **Seamless Experience**: After successful login, pending survey submission continues automatically
+- **Enhanced AuthModal**: Added onSuccess callback support for post-login actions
+- **User State Detection**: Proactive authentication check before submission attempt
+- **Improved Error Handling**: Replaced error messages with intuitive login prompts
