@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PenTool, Lightbulb, ArrowRight } from "lucide-react";
+import { PenTool, Lightbulb, ArrowRight, BarChart3 } from "lucide-react";
 import { useContentText } from "@/hooks/useWebContent";
 
 interface HeroSectionProps {
@@ -48,6 +48,17 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
             >
               <PenTool className="h-5 w-5 mr-2" />
               서명 바로가기
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+            
+            <Button
+              onClick={() => handleButtonClick("survey")}
+              size="lg"
+              variant="outline"
+              className="border-white border-2 text-blue-700 hover:bg-white hover:text-blue-800 font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
+            >
+              <BarChart3 className="h-5 w-5 mr-2" />
+              여론조사 참여
               <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
             

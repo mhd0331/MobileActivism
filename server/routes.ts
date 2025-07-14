@@ -6,6 +6,7 @@ import { storage } from "./storage";
 import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdminUserSchema, insertNoticeSchema, insertResourceSchema, insertWebContentSchema } from "@shared/schema";
 import { z } from "zod";
 import { initializeWebContent } from "./initializeWebContent";
+import { initializeSurvey } from "./initializeSurvey";
 
 declare module 'express-session' {
   interface SessionData {
@@ -457,6 +458,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to initialize web content:", error);
       res.status(500).json({ message: "Failed to initialize web content" });
+    }
+  });
+
+  // Survey Routes
+  app.get("/api/surveys/active", async (req, res) => {
+    try {
+      const survey = await storage.getActiveSurvey();
+      if (!survey) {
+        return res.status(404).json({ message: "No active survey found" });
+      }
+      res.json(survey);
+    } catch (error) {
+      console.error("Error fetching active survey:", error);
+      res.status(500).json({ message: "Failed to fetch active survey" });
+    }
+  });
+
+  app.get("/api/surveys/results", async (req, res) => {
+    try {
+      const survey = await storage.getActiveSurvey();
+      if (!survey) {
+        return res.status(404).json({ message: "No active survey found" });
+      }
+      
+      const results = await storage.getSurveyResults(survey.id);
+      res.json(results);
+    } catch (error) {
+      console.error("Error fetching survey results:", error);
+      res.status(500).json({ message: "Failed to fetch survey results" });
+    }
+  });
+
+  app.post("/api/surveys/responses", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { surveyId, answers } = req.body;
+
+      if (!surveyId || !answers || !Array.isArray(answers)) {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+
+      // Get user's IP and user agent for analytics
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.get('User-Agent');
+      
+      // Get user's district
+      const user = await storage.getUser(userId);
+      const district = user?.district;
+
+      // Create response record
+      const response = await storage.createSurveyResponse({
+        surveyId: parseInt(surveyId),
+        userId,
+        ipAddress: ipAddress || '',
+        userAgent: userAgent || '',
+        district: district || ''
+      });
+
+      // Create answer records
+      for (const answer of answers) {
+        await storage.createSurveyAnswer({
+          responseId: response.id,
+          questionId: answer.questionId,
+          answerValue: answer.answerValue,
+          selectedOptions: answer.selectedOptions
+        });
+      }
+
+      res.json({ message: "Survey response submitted successfully", responseId: response.id });
+    } catch (error) {
+      console.error("Error submitting survey response:", error);
+      res.status(500).json({ message: "Failed to submit survey response" });
+    }
+  });
+
+  // Admin Survey Management Routes
+  app.get("/api/admin/surveys", requireAdminAuth, async (req, res) => {
+    try {
+      const surveys = await storage.getSurveys();
+      res.json({ surveys });
+    } catch (error) {
+      console.error("Error fetching surveys:", error);
+      res.status(500).json({ message: "Failed to fetch surveys" });
+    }
+  });
+
+  app.post("/api/admin/surveys", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = z.object({
+        title: z.string(),
+        description: z.string().optional(),
+        isActive: z.boolean().default(false),
+        startDate: z.string().optional(),
+        endDate: z.string().optional()
+      }).parse(req.body);
+
+      const survey = await storage.createSurvey({
+        ...validatedData,
+        startDate: validatedData.startDate ? new Date(validatedData.startDate) : new Date(),
+        endDate: validatedData.endDate ? new Date(validatedData.endDate) : undefined
+      } as any);
+
+      res.json({ survey });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid survey data", errors: error.errors });
+      }
+      console.error("Error creating survey:", error);
+      res.status(500).json({ message: "Failed to create survey" });
+    }
+  });
+
+  // Survey Initialization (Admin only)
+  app.post("/api/admin/initialize-survey", requireAdminAuth, async (req, res) => {
+    try {
+      await initializeSurvey();
+      res.json({ message: "Survey initialized successfully" });
+    } catch (error) {
+      console.error("Failed to initialize survey:", error);
+      res.status(500).json({ message: "Failed to initialize survey" });
     }
   });
 

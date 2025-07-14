@@ -331,36 +331,67 @@ export default function AdminPage() {
                     웹사이트의 텍스트 콘텐츠를 관리합니다. 서명 관련 통계는 자동 계산되므로 편집할 수 없습니다.
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={async () => {
-                    try {
-                      const response = await fetch("/api/admin/initialize-content", {
-                        method: "POST",
-                        credentials: "include",
-                      });
-                      if (response.ok) {
-                        toast({
-                          title: "성공",
-                          description: "웹 콘텐츠가 초기화되었습니다.",
+                <div className="flex gap-2">
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch("/api/admin/initialize-content", {
+                          method: "POST",
+                          credentials: "include",
                         });
-                        // Refresh content list
-                        queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
-                      } else {
-                        throw new Error("초기화 실패");
+                        if (response.ok) {
+                          toast({
+                            title: "성공",
+                            description: "웹 콘텐츠가 초기화되었습니다.",
+                          });
+                          // Refresh content list
+                          queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
+                        } else {
+                          throw new Error("초기화 실패");
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "오류",
+                          description: "웹 콘텐츠 초기화에 실패했습니다.",
+                          variant: "destructive",
+                        });
                       }
-                    } catch (error) {
-                      toast({
-                        title: "오류",
-                        description: "웹 콘텐츠 초기화에 실패했습니다.",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  콘텐츠 초기화
-                </Button>
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    콘텐츠 초기화
+                  </Button>
+                  
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch("/api/admin/initialize-survey", {
+                          method: "POST",
+                          credentials: "include",
+                        });
+                        if (response.ok) {
+                          toast({
+                            title: "성공",
+                            description: "여론조사가 초기화되었습니다.",
+                          });
+                        } else {
+                          throw new Error("초기화 실패");
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "오류",
+                          description: "여론조사 초기화에 실패했습니다.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    여론조사 초기화
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Add Content Form */}

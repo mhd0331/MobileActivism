@@ -1,9 +1,12 @@
 import { 
   users, signatures, policies, policySupports, notices, resources, adminUsers, webContent,
+  surveys, surveyQuestions, surveyResponses, surveyAnswers,
   type User, type InsertUser, type Signature, type InsertSignature,
   type Policy, type InsertPolicy, type PolicySupport, type InsertPolicySupport,
   type Notice, type InsertNotice, type Resource, type InsertResource,
-  type AdminUser, type InsertAdminUser, type WebContent, type InsertWebContent
+  type AdminUser, type InsertAdminUser, type WebContent, type InsertWebContent,
+  type Survey, type InsertSurvey, type SurveyQuestion, type InsertSurveyQuestion,
+  type SurveyResponse, type InsertSurveyResponse, type SurveyAnswer, type InsertSurveyAnswer
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, count, sql, and } from "drizzle-orm";
@@ -62,6 +65,36 @@ export interface IStorage {
   createWebContent(content: InsertWebContent): Promise<WebContent>;
   updateWebContent(id: number, content: Partial<InsertWebContent>): Promise<WebContent>;
   deleteWebContent(id: number): Promise<void>;
+
+  // Survey Management
+  getSurveys(): Promise<Survey[]>;
+  getActiveSurvey(): Promise<Survey | undefined>;
+  createSurvey(survey: InsertSurvey): Promise<Survey>;
+  updateSurvey(id: number, survey: Partial<InsertSurvey>): Promise<Survey>;
+  deleteSurvey(id: number): Promise<void>;
+
+  // Survey Questions
+  getSurveyQuestions(surveyId: number): Promise<SurveyQuestion[]>;
+  createSurveyQuestion(question: InsertSurveyQuestion): Promise<SurveyQuestion>;
+  updateSurveyQuestion(id: number, question: Partial<InsertSurveyQuestion>): Promise<SurveyQuestion>;
+  deleteSurveyQuestion(id: number): Promise<void>;
+
+  // Survey Responses
+  createSurveyResponse(response: InsertSurveyResponse): Promise<SurveyResponse>;
+  getSurveyResponses(surveyId: number): Promise<SurveyResponse[]>;
+  createSurveyAnswer(answer: InsertSurveyAnswer): Promise<SurveyAnswer>;
+  
+  // Survey Analytics
+  getSurveyResults(surveyId: number): Promise<{
+    totalResponses: number;
+    participationRate: number;
+    averageTime: number;
+    questionResults: Array<{
+      questionId: number;
+      questionText: string;
+      responses: Array<{ value: string; count: number; percentage: number }>;
+    }>;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -283,6 +316,158 @@ export class DatabaseStorage implements IStorage {
 
   async deleteWebContent(id: number): Promise<void> {
     await db.update(webContent).set({ isActive: false }).where(eq(webContent.id, id));
+  }
+
+  // Survey Management Implementation
+  async getSurveys(): Promise<Survey[]> {
+    return await db.select().from(surveys).orderBy(desc(surveys.createdAt));
+  }
+
+  async getActiveSurvey(): Promise<Survey | undefined> {
+    const [survey] = await db.select().from(surveys).where(eq(surveys.isActive, true));
+    if (!survey) return undefined;
+
+    const questions = await this.getSurveyQuestions(survey.id);
+    return { ...survey, questions } as any;
+  }
+
+  async createSurvey(insertSurvey: InsertSurvey): Promise<Survey> {
+    const [survey] = await db.insert(surveys).values(insertSurvey).returning();
+    return survey;
+  }
+
+  async updateSurvey(id: number, updateData: Partial<InsertSurvey>): Promise<Survey> {
+    const [survey] = await db
+      .update(surveys)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(surveys.id, id))
+      .returning();
+    return survey;
+  }
+
+  async deleteSurvey(id: number): Promise<void> {
+    await db.delete(surveys).where(eq(surveys.id, id));
+  }
+
+  // Survey Questions Implementation
+  async getSurveyQuestions(surveyId: number): Promise<SurveyQuestion[]> {
+    return await db
+      .select()
+      .from(surveyQuestions)
+      .where(eq(surveyQuestions.surveyId, surveyId))
+      .orderBy(surveyQuestions.orderIndex);
+  }
+
+  async createSurveyQuestion(insertQuestion: InsertSurveyQuestion): Promise<SurveyQuestion> {
+    const [question] = await db.insert(surveyQuestions).values(insertQuestion).returning();
+    return question;
+  }
+
+  async updateSurveyQuestion(id: number, updateData: Partial<InsertSurveyQuestion>): Promise<SurveyQuestion> {
+    const [question] = await db
+      .update(surveyQuestions)
+      .set(updateData)
+      .where(eq(surveyQuestions.id, id))
+      .returning();
+    return question;
+  }
+
+  async deleteSurveyQuestion(id: number): Promise<void> {
+    await db.delete(surveyQuestions).where(eq(surveyQuestions.id, id));
+  }
+
+  // Survey Responses Implementation
+  async createSurveyResponse(insertResponse: InsertSurveyResponse): Promise<SurveyResponse> {
+    const [response] = await db.insert(surveyResponses).values(insertResponse).returning();
+    return response;
+  }
+
+  async getSurveyResponses(surveyId: number): Promise<SurveyResponse[]> {
+    return await db
+      .select()
+      .from(surveyResponses)
+      .where(eq(surveyResponses.surveyId, surveyId))
+      .orderBy(desc(surveyResponses.createdAt));
+  }
+
+  async createSurveyAnswer(insertAnswer: InsertSurveyAnswer): Promise<SurveyAnswer> {
+    const [answer] = await db.insert(surveyAnswers).values(insertAnswer).returning();
+    return answer;
+  }
+
+  // Survey Analytics Implementation
+  async getSurveyResults(surveyId: number): Promise<{
+    totalResponses: number;
+    participationRate: number;
+    averageTime: number;
+    questionResults: Array<{
+      questionId: number;
+      questionText: string;
+      responses: Array<{ value: string; count: number; percentage: number }>;
+    }>;
+  }> {
+    // Get total responses count
+    const [{ totalResponses }] = await db
+      .select({ totalResponses: count() })
+      .from(surveyResponses)
+      .where(eq(surveyResponses.surveyId, surveyId));
+
+    // Get total user count for participation rate
+    const [{ totalUsers }] = await db
+      .select({ totalUsers: count() })
+      .from(users);
+
+    const participationRate = totalUsers > 0 ? Math.round((totalResponses / totalUsers) * 100) : 0;
+
+    // For now, set average time to 7 minutes (this could be calculated from actual response times)
+    const averageTime = 7;
+
+    // Get question results
+    const questions = await this.getSurveyQuestions(surveyId);
+    const questionResults = [];
+
+    for (const question of questions) {
+      const answers = await db
+        .select()
+        .from(surveyAnswers)
+        .innerJoin(surveyResponses, eq(surveyAnswers.responseId, surveyResponses.id))
+        .where(and(
+          eq(surveyAnswers.questionId, question.id),
+          eq(surveyResponses.surveyId, surveyId)
+        ));
+
+      const responseCounts: Record<string, number> = {};
+      
+      answers.forEach(({ survey_answers: answer }) => {
+        if (answer.answerValue) {
+          responseCounts[answer.answerValue] = (responseCounts[answer.answerValue] || 0) + 1;
+        }
+        if (answer.selectedOptions && Array.isArray(answer.selectedOptions)) {
+          (answer.selectedOptions as string[]).forEach(option => {
+            responseCounts[option] = (responseCounts[option] || 0) + 1;
+          });
+        }
+      });
+
+      const responses = Object.entries(responseCounts).map(([value, count]) => ({
+        value,
+        count,
+        percentage: totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0
+      }));
+
+      questionResults.push({
+        questionId: question.id,
+        questionText: question.questionText,
+        responses
+      });
+    }
+
+    return {
+      totalResponses,
+      participationRate,
+      averageTime,
+      questionResults
+    };
   }
 }
 

@@ -5,6 +5,7 @@ import MotivationSection from "@/components/motivation-section";
 import Navigation from "@/components/navigation";
 import NoticesSection from "@/components/notices-section";
 import SignatureSection from "@/components/signature-section";
+import SurveySection from "@/components/survey-section";
 import PoliciesSection from "@/components/policies-section";
 import ResourcesSection from "@/components/resources-section";
 import DashboardSection from "@/components/dashboard-section";
@@ -31,6 +32,8 @@ export default function Home() {
         return <NoticesSection />;
       case "signature":
         return <SignatureSection />;
+      case "survey":
+        return <SurveySection />;
       case "policies":
         return <PoliciesSection />;
       case "resources":
