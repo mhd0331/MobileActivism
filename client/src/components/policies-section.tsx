@@ -66,6 +66,10 @@ export default function PoliciesSection() {
       queryClient.invalidateQueries({ queryKey: ["/api/policies"] });
     },
     onError: (error: any) => {
+      if (error.message.includes("401")) {
+        setShowAuthModal(true);
+        return;
+      }
       if (error.message.includes("Already supported")) {
         toast({
           title: "이미 찬성하셨습니다",
@@ -91,6 +95,10 @@ export default function PoliciesSection() {
   };
 
   const handleNewPolicy = () => {
+    if (!auth?.user) {
+      setShowAuthModal(true);
+      return;
+    }
     setShowPolicyModal(true);
   };
 

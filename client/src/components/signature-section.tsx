@@ -27,9 +27,12 @@ export default function SignatureSection() {
 
   const signatureMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/signatures", {
-        method: "POST",
-      });
+      const response = await apiRequest("POST", "/api/signatures");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -40,6 +43,10 @@ export default function SignatureSection() {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     },
     onError: (error: any) => {
+      if (error.message.includes("401")) {
+        setShowAuthModal(true);
+        return;
+      }
       if (error.message.includes("Already signed")) {
         toast({
           title: "이미 서명하셨습니다",

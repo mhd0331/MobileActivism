@@ -108,10 +108,12 @@ export default function SurveySection() {
   // Submit survey response
   const submitSurveyMutation = useMutation({
     mutationFn: async (responseData: any) => {
-      return await apiRequest("/api/surveys/responses", {
-        method: "POST",
-        body: JSON.stringify(responseData),
-      });
+      const response = await apiRequest("POST", "/api/surveys/responses", responseData);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       setIsSubmitted(true);

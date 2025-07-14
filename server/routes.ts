@@ -31,7 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication middleware
   const requireAuth = (req: any, res: any, next: any) => {
     if (!req.session.userId) {
-      return res.status(401).json({ message: "Authentication required" });
+      return res.status(401).json({ message: "Not authenticated" });
     }
     next();
   };
@@ -141,21 +141,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/policies", async (req, res) => {
+  app.post("/api/policies", requireAuth, async (req, res) => {
     try {
-      if (!req.session.userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      const authorId = req.session.userId;
+      const authorId = req.session.userId!;
       const policyData = { ...req.body, authorId };
-      console.log("Policy creation attempt:", { authorId, body: req.body });
       
       const validatedData = insertPolicySchema.parse(policyData);
-      console.log("Validated policy data:", validatedData);
-      
       const policy = await storage.createPolicy(validatedData);
-      console.log("Policy created successfully:", policy);
       res.json({ policy });
     } catch (error) {
       console.error("Policy creation error:", error);

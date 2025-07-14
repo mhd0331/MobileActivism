@@ -43,6 +43,9 @@ export function useLogin() {
       queryClient.removeQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/signatures/check"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/surveys"] });
+      // Refresh all queries to ensure consistent auth state
+      queryClient.refetchQueries();
     },
   });
 }
