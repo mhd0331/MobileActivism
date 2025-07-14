@@ -30,9 +30,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Authentication middleware
   const requireAuth = (req: any, res: any, next: any) => {
+    console.log('requireAuth check:', {
+      sessionId: req.sessionID,
+      userId: req.session?.userId,
+      session: req.session
+    });
+    
     if (!req.session.userId) {
+      console.log('Authentication failed: no userId in session');
       return res.status(401).json({ message: "Not authenticated" });
     }
+    console.log('Authentication successful for userId:', req.session.userId);
     next();
   };
 
@@ -64,6 +72,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       req.session.userId = user.id;
+      console.log('Login successful:', {
+        sessionId: req.sessionID,
+        userId: user.id,
+        session: req.session
+      });
       res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
     } catch (error) {
       console.error('Login error:', error);
