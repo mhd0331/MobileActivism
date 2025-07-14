@@ -49,7 +49,14 @@ export function useUpdateWebContent() {
       });
     },
     onSuccess: () => {
+      // Invalidate all web content queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === "/api/web-content";
+        }
+      });
     },
   });
 }
