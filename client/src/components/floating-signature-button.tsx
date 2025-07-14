@@ -30,7 +30,20 @@ export default function FloatingSignatureButton() {
         <PenTool className="h-6 w-6" />
       </Button>
       
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal} 
+        onSuccess={() => {
+          setShowAuthModal(false);
+          // Scroll to signature section after login
+          setTimeout(() => {
+            const signatureSection = document.getElementById("signature-section");
+            if (signatureSection) {
+              signatureSection.scrollIntoView({ behavior: "smooth" });
+            }
+          }, 500);
+        }}
+      />
     </>
   );
 }

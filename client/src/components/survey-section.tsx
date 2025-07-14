@@ -71,9 +71,6 @@ export default function SurveySection() {
     staleTime: 0, // Always fetch fresh data for auth state
   });
 
-  // Debug logging
-  console.log('Survey Section - Current User:', currentUser);
-
   // Submit survey response
   const submitSurveyMutation = useMutation({
     mutationFn: async (responseData: any) => {
@@ -111,15 +108,10 @@ export default function SurveySection() {
 
   // Check if current question should be shown based on conditions
   const shouldShowQuestion = (question: SurveyQuestion) => {
-    if (!question.conditions?.showIf) {
-      console.log(`Question ${question.id}: No conditions, showing`);
-      return true;
-    }
+    if (!question.conditions?.showIf) return true;
     
     const { questionId, answer } = question.conditions.showIf;
     const previousAnswer = answers[questionId];
-    
-    console.log(`Question ${question.id}: Condition requires answer "${answer}" for question ${questionId}, got "${previousAnswer}"`);
     
     return previousAnswer === answer;
   };
@@ -128,17 +120,11 @@ export default function SurveySection() {
   const getNextQuestionIndex = (currentIndex: number) => {
     if (!survey?.questions) return currentIndex;
     
-    console.log('Getting next question from index:', currentIndex);
-    
     for (let i = currentIndex + 1; i < survey.questions.length; i++) {
-      const question = survey.questions[i];
-      const shouldShow = shouldShowQuestion(question);
-      console.log(`Question ${i} (ID: ${question.id}): should show = ${shouldShow}`);
-      if (shouldShow) {
+      if (shouldShowQuestion(survey.questions[i])) {
         return i;
       }
     }
-    console.log('No more questions, returning end of survey');
     return survey.questions.length; // End of survey
   };
 
@@ -162,20 +148,11 @@ export default function SurveySection() {
   };
 
   const handleNext = () => {
-    console.log('HandleNext called. Current index:', currentQuestionIndex);
-    console.log('Current answers:', answers);
-    console.log('Current question:', currentQuestion);
-    
     const nextIndex = getNextQuestionIndex(currentQuestionIndex);
-    console.log('Next index:', nextIndex);
-    console.log('Survey questions length:', survey?.questions?.length);
-    
     if (nextIndex >= survey.questions.length) {
       // End of survey - show submission
-      console.log('End of survey, submitting...');
       handleSubmit();
     } else {
-      console.log('Moving to next question:', nextIndex);
       setCurrentQuestionIndex(nextIndex);
     }
   };

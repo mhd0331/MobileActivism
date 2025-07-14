@@ -27,8 +27,9 @@ export default function SignatureSection() {
 
   const signatureMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/signatures");
-      return response.json();
+      return await apiRequest("/api/signatures", {
+        method: "POST",
+      });
     },
     onSuccess: () => {
       toast({
@@ -61,6 +62,15 @@ export default function SignatureSection() {
       return;
     }
     signatureMutation.mutate();
+  };
+
+  // Handle successful login for signature
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    // Attempt signature after successful login
+    setTimeout(() => {
+      signatureMutation.mutate();
+    }, 500);
   };
 
   const signatureCount = stats?.stats.signatureCount || 0;
@@ -202,7 +212,11 @@ export default function SignatureSection() {
         </div>
       </section>
       
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal} 
+        onSuccess={handleAuthSuccess}
+      />
     </>
   );
 }
