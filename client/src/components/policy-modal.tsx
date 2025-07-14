@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import {
@@ -24,6 +24,7 @@ import { InfoIcon } from "lucide-react";
 interface PolicyModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onAuthRequired?: () => void;
 }
 
 const categories = [
@@ -39,12 +40,17 @@ const categories = [
   { value: "allowance", label: "기본수당" },
 ];
 
-export default function PolicyModal({ open, onOpenChange }: PolicyModalProps) {
+export default function PolicyModal({ open, onOpenChange, onAuthRequired }: PolicyModalProps) {
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  const { data: user } = useQuery({
+    queryKey: ["/api/me"],
+    retry: false,
+  });
 
   const createPolicyMutation = useMutation({
     mutationFn: async (data: { category: string; title: string; content: string }) => {
@@ -60,8 +66,15 @@ export default function PolicyModal({ open, onOpenChange }: PolicyModalProps) {
       resetForm();
       onOpenChange(false);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Policy creation error:", error);
+      
+      // Check if it's an authentication error
+      if (error.message?.includes('401')) {
+        onAuthRequired?.();
+        return;
+      }
+      
       toast({
         title: "잠시만요",
         description: "정책 제안이 저장되지 않았습니다. 인터넷 연결을 확인하고 다시 시도해주세요.",
@@ -85,6 +98,12 @@ export default function PolicyModal({ open, onOpenChange }: PolicyModalProps) {
         description: "카테고리, 제목, 내용을 모두 작성해주시면 정책 제안이 완료됩니다.",
         variant: "default",
       });
+      return;
+    }
+
+    // Check authentication before submitting
+    if (!user) {
+      onAuthRequired?.();
       return;
     }
 

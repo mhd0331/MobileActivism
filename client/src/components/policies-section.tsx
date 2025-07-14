@@ -87,10 +87,6 @@ export default function PoliciesSection() {
   };
 
   const handleNewPolicy = () => {
-    if (!auth?.user) {
-      setShowAuthModal(true);
-      return;
-    }
     setShowPolicyModal(true);
   };
 
@@ -163,7 +159,14 @@ export default function PoliciesSection() {
       </section>
       
       <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
-      <PolicyModal open={showPolicyModal} onOpenChange={setShowPolicyModal} />
+      <PolicyModal 
+        open={showPolicyModal} 
+        onOpenChange={setShowPolicyModal}
+        onAuthRequired={() => {
+          setShowPolicyModal(false);
+          setShowAuthModal(true);
+        }}
+      />
     </>
   );
 }

@@ -141,9 +141,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/policies", requireAuth, async (req, res) => {
+  app.post("/api/policies", async (req, res) => {
     try {
-      const authorId = req.session.userId!;
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const authorId = req.session.userId;
       const policyData = { ...req.body, authorId };
       console.log("Policy creation attempt:", { authorId, body: req.body });
       
