@@ -132,6 +132,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/policies/all", async (req, res) => {
+    try {
+      const policies = await storage.getPolicies();
+      res.json({ policies });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch policies" });
+    }
+  });
+
   app.post("/api/policies", requireAuth, async (req, res) => {
     try {
       const authorId = req.session.userId!;
