@@ -188,11 +188,16 @@ export default function SurveySection() {
   };
 
   const handleNext = () => {
+    console.log("handleNext called. Current index:", currentQuestionIndex, "Total questions:", survey.questions.length);
     const nextIndex = getNextQuestionIndex(currentQuestionIndex);
+    console.log("Next index:", nextIndex);
+    
     if (nextIndex >= survey.questions.length) {
       // End of survey - show submission
+      console.log("End of survey reached, calling handleSubmit");
       handleSubmit();
     } else {
+      console.log("Moving to next question:", nextIndex);
       setCurrentQuestionIndex(nextIndex);
     }
   };
@@ -203,7 +208,16 @@ export default function SurveySection() {
   };
 
   const handleSubmit = async () => {
-    if (!survey) return;
+    console.log("=== HANDLE SUBMIT CALLED ===");
+    console.log("Survey:", survey?.id);
+    console.log("Auth loading:", authLoading);
+    console.log("Auth data:", auth);
+    console.log("Answers:", answers);
+    
+    if (!survey) {
+      console.log("No survey found, returning");
+      return;
+    }
 
     // Wait for auth loading to complete
     if (authLoading) {
@@ -226,6 +240,7 @@ export default function SurveySection() {
       selectedOptions: Array.isArray(value) ? value : null
     }));
 
+    console.log("Submission answers:", submissionAnswers);
     submitSurveyMutation.mutate({
       surveyId: survey.id,
       answers: submissionAnswers
@@ -567,7 +582,10 @@ export default function SurveySection() {
                   </Button>
                   
                   <Button
-                    onClick={handleNext}
+                    onClick={() => {
+                      console.log("Survey button clicked:", currentQuestionIndex === survey.questions.length - 1 ? "SUBMIT" : "NEXT");
+                      handleNext();
+                    }}
                     disabled={currentQuestion.isRequired && !isCurrentAnswered}
                     className="min-w-[100px]"
                   >
