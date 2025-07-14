@@ -182,37 +182,57 @@ export default function SurveySection() {
       selectedOptions: Array.isArray(value) ? value : null
     }));
 
-    await submitSurveyMutation.mutateAsync({
-      surveyId: survey.id,
-      answers: submissionAnswers
-    });
+    try {
+      await submitSurveyMutation.mutateAsync({
+        surveyId: survey.id,
+        answers: submissionAnswers
+      });
+    } catch (error) {
+      console.error('Survey submission error:', error);
+    }
   };
 
   // Handle successful login - submit pending survey if needed
   const handleAuthSuccess = async () => {
     setShowAuthModal(false);
     
-    // Refetch user data to update authentication state
-    try {
-      await refetchUser();
+    if (pendingSubmission) {
+      setPendingSubmission(false);
       
-      if (pendingSubmission) {
-        setPendingSubmission(false);
-        // Wait a moment for user state to update, then retry submission
-        setTimeout(() => {
-          handleSubmit();
-        }, 1000);
-      } else {
-        toast({
-          title: "로그인 완료",
-          description: "성공적으로 로그인되었습니다.",
-        });
-      }
-    } catch (error) {
       toast({
         title: "로그인 완료",
-        description: "로그인이 완료되었습니다. 여론조사 제출 버튼을 다시 눌러주세요.",
-        duration: 5000,
+        description: "여론조사를 제출하는 중입니다...",
+      });
+      
+      // Wait a moment and then submit directly without checking user state again
+      setTimeout(async () => {
+        if (!survey) return;
+        
+        try {
+          // Prepare answers for submission
+          const submissionAnswers = Object.entries(answers).map(([questionId, value]) => ({
+            questionId: parseInt(questionId),
+            answerValue: typeof value === 'string' ? value : null,
+            selectedOptions: Array.isArray(value) ? value : null
+          }));
+
+          await submitSurveyMutation.mutateAsync({
+            surveyId: survey.id,
+            answers: submissionAnswers
+          });
+        } catch (error) {
+          console.error('Submit error after login:', error);
+          toast({
+            title: "제출 실패",
+            description: "여론조사 제출에 실패했습니다. 제출 버튼을 다시 눌러주세요.",
+            variant: "destructive",
+          });
+        }
+      }, 1000);
+    } else {
+      toast({
+        title: "로그인 완료",
+        description: "성공적으로 로그인되었습니다.",
       });
     }
   };
