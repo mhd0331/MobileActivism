@@ -22,14 +22,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.use(session({
     secret: process.env.SESSION_SECRET || 'jinan-campaign-secret-key',
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Force session save even if not modified
+    saveUninitialized: true, // Save uninitialized sessions
     store: new Store({
       checkPeriod: 86400000 // prune expired entries every 24h
     }),
     cookie: {
       secure: false, // Set to true in production with HTTPS
-      httpOnly: true,
+      httpOnly: false, // Allow JS access for debugging
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax' // Better cookie handling
     }
@@ -72,21 +72,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      req.session.userId = user.id;
-      console.log('Session set with userId:', user.id);
-      console.log('Session ID:', req.sessionID);
-      console.log('Session contents:', req.session);
-      
-      // Force save session and wait for completion
-      req.session.save((err) => {
+      // Regenerate session ID to prevent session fixation attacks
+      req.session.regenerate((err) => {
         if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ message: "Session save failed" });
-        } else {
-          console.log('Session saved successfully');
-          console.log('Final session state:', req.session);
-          res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
+          console.error('Session regeneration error:', err);
+          return res.status(500).json({ message: "Session regeneration failed" });
         }
+        
+        req.session.userId = user.id;
+        console.log('Session set with userId:', user.id);
+        console.log('New Session ID:', req.sessionID);
+        console.log('Session contents:', req.session);
+        
+        // Force save session and wait for completion
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).json({ message: "Session save failed" });
+          } else {
+            console.log('Session saved successfully');
+            console.log('Final session state:', req.session);
+            res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
+          }
+        });
       });
     } catch (error) {
       console.error('Login error:', error);
