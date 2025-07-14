@@ -62,9 +62,9 @@ export default function PolicyModal({ open, onOpenChange }: PolicyModalProps) {
     },
     onError: () => {
       toast({
-        title: "제안 실패",
-        description: "정책 제안 중 오류가 발생했습니다. 다시 시도해주세요.",
-        variant: "destructive",
+        title: "잠시만요",
+        description: "정책 제안이 저장되지 않았습니다. 인터넷 연결을 확인하고 다시 시도해주세요.",
+        variant: "default",
       });
     },
   });
@@ -80,9 +80,9 @@ export default function PolicyModal({ open, onOpenChange }: PolicyModalProps) {
     
     if (!category || !title.trim() || !content.trim()) {
       toast({
-        title: "입력 오류",
-        description: "모든 필드를 입력해주세요.",
-        variant: "destructive",
+        title: "입력 확인",
+        description: "카테고리, 제목, 내용을 모두 작성해주시면 정책 제안이 완료됩니다.",
+        variant: "default",
       });
       return;
     }
