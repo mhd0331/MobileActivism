@@ -13,24 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/auth-modal";
 
-// Hook to get survey content from database
-function useSurveyContent(key: string) {
-  const { data, isLoading, error } = useQuery({
-    queryKey: [`/api/web-content/survey/${key}`],
-    retry: false,
-    staleTime: 0, // Always fetch fresh data
-  });
-  
-  // Debug logging
-  if (error) {
-    console.error(`Failed to load survey content for key: ${key}`, error);
-  }
-  
-  console.log(`Survey content for ${key}:`, data?.content?.content);
-  
-  // Return content from the nested structure
-  return data?.content?.content || "";
-}
+
 
 interface SurveyQuestion {
   id: number;
@@ -70,34 +53,48 @@ export default function SurveySection() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState(false);
 
-  // Get survey content from database
-  const noSurveyTitle = useSurveyContent("no_survey_title") || "현재 진행 중인 여론조사가 없습니다";
-  const noSurveyDescription = useSurveyContent("no_survey_description") || "새로운 여론조사가 시작되면 알려드리겠습니다.";
-  const resultsTitle = useSurveyContent("results_title") || "여론조사 결과";
-  const totalResponsesLabel = useSurveyContent("total_responses_label") || "총 응답수";
-  const participationRateLabel = useSurveyContent("participation_rate_label") || "참여율";
-  const averageTimeLabel = useSurveyContent("average_time_label") || "평균 소요시간";
-  const backToSurveyButton = useSurveyContent("back_to_survey_button") || "여론조사 참여하기";
-  const completionTitle = useSurveyContent("completion_title") || "여론조사 응답이 완료되었습니다!";
-  const completionDescription = useSurveyContent("completion_description") || "소중한 의견을 주셔서 감사합니다. 여러분의 참여가 진안군의 미래를 만들어갑니다.";
-  const viewResultsButton = useSurveyContent("view_results_button") || "결과 보기";
-  const participateAgainButton = useSurveyContent("participate_again_button") || "다시 참여하기";
-  const previousButton = useSurveyContent("previous_button") || "이전";
-  const nextButton = useSurveyContent("next_button") || "다음";
-  const submitButton = useSurveyContent("submit_button") || "제출하기";
+  // Get survey content from database using useQuery directly
+  const { data: noSurveyTitleData } = useQuery({ queryKey: [`/api/web-content/survey/no_survey_title`], staleTime: 0 });
+  const { data: noSurveyDescriptionData } = useQuery({ queryKey: [`/api/web-content/survey/no_survey_description`], staleTime: 0 });
+  const { data: resultsTitleData } = useQuery({ queryKey: [`/api/web-content/survey/results_title`], staleTime: 0 });
+  const { data: totalResponsesLabelData } = useQuery({ queryKey: [`/api/web-content/survey/total_responses_label`], staleTime: 0 });
+  const { data: participationRateLabelData } = useQuery({ queryKey: [`/api/web-content/survey/participation_rate_label`], staleTime: 0 });
+  const { data: averageTimeLabelData } = useQuery({ queryKey: [`/api/web-content/survey/average_time_label`], staleTime: 0 });
+  const { data: backToSurveyButtonData } = useQuery({ queryKey: [`/api/web-content/survey/back_to_survey_button`], staleTime: 0 });
+  const { data: completionTitleData } = useQuery({ queryKey: [`/api/web-content/survey/completion_title`], staleTime: 0 });
+  const { data: completionDescriptionData } = useQuery({ queryKey: [`/api/web-content/survey/completion_description`], staleTime: 0 });
+  const { data: viewResultsButtonData } = useQuery({ queryKey: [`/api/web-content/survey/view_results_button`], staleTime: 0 });
+  const { data: participateAgainButtonData } = useQuery({ queryKey: [`/api/web-content/survey/participate_again_button`], staleTime: 0 });
+  const { data: previousButtonData } = useQuery({ queryKey: [`/api/web-content/survey/previous_button`], staleTime: 0 });
+  const { data: nextButtonData } = useQuery({ queryKey: [`/api/web-content/survey/next_button`], staleTime: 0 });
+  const { data: submitButtonData } = useQuery({ queryKey: [`/api/web-content/survey/submit_button`], staleTime: 0 });
+  const { data: requiredFieldErrorData } = useQuery({ queryKey: [`/api/web-content/survey/required_field_error`], staleTime: 0 });
+
+  // Extract content from API responses
+  const noSurveyTitle = noSurveyTitleData?.content?.content || "현재 진행 중인 여론조사가 없습니다";
+  const noSurveyDescription = noSurveyDescriptionData?.content?.content || "새로운 여론조사가 시작되면 알려드리겠습니다.";
+  const resultsTitle = resultsTitleData?.content?.content || "여론조사 결과";
+  const totalResponsesLabel = totalResponsesLabelData?.content?.content || "총 응답수";
+  const participationRateLabel = participationRateLabelData?.content?.content || "참여율";
+  const averageTimeLabel = averageTimeLabelData?.content?.content || "평균 소요시간";
+  const backToSurveyButton = backToSurveyButtonData?.content?.content || "여론조사 참여하기";
+  const completionTitle = completionTitleData?.content?.content || "여론조사 응답이 완료되었습니다!";
+  const completionDescription = completionDescriptionData?.content?.content || "소중한 의견을 주셔서 감사합니다. 여러분의 참여가 진안군의 미래를 만들어갑니다.";
+  const viewResultsButton = viewResultsButtonData?.content?.content || "결과 보기";
+  const participateAgainButton = participateAgainButtonData?.content?.content || "다시 참여하기";
+  const previousButton = previousButtonData?.content?.content || "이전";
+  const nextButton = nextButtonData?.content?.content || "다음";
+  const submitButton = submitButtonData?.content?.content || "제출하기";
+  const requiredFieldError = requiredFieldErrorData?.content?.content || "필수 문항입니다. 답변을 선택해주세요.";
 
   // Debug logging for buttons specifically
   useEffect(() => {
     console.log("Button text values:", { 
       previousButton, 
       nextButton, 
-      submitButton,
-      rawPrevious: useSurveyContent("previous_button"),
-      rawNext: useSurveyContent("next_button"),
-      rawSubmit: useSurveyContent("submit_button")
+      submitButton
     });
   }, [previousButton, nextButton, submitButton]);
-  const requiredFieldError = useSurveyContent("required_field_error") || "필수 문항입니다. 답변을 선택해주세요.";
 
 
 
@@ -224,6 +221,7 @@ export default function SurveySection() {
 
   const handlePrevious = () => {
     const prevIndex = getPreviousQuestionIndex(currentQuestionIndex);
+    console.log(`Moving from question ${currentQuestionIndex} to previous question ${prevIndex}`);
     setCurrentQuestionIndex(prevIndex);
   };
 
