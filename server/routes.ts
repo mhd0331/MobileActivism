@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdminUserSchema, insertNoticeSchema, insertResourceSchema, insertWebContentSchema } from "@shared/schema";
 import { z } from "zod";
+import { initializeWebContent } from "./initializeWebContent";
 
 declare module 'express-session' {
   interface SessionData {
@@ -445,6 +446,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Web content deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete web content" });
+    }
+  });
+
+  // Web Content Initialization (Admin only)
+  app.post("/api/admin/initialize-content", requireAdminAuth, async (req, res) => {
+    try {
+      await initializeWebContent();
+      res.json({ message: "Web content initialized successfully" });
+    } catch (error) {
+      console.error("Failed to initialize web content:", error);
+      res.status(500).json({ message: "Failed to initialize web content" });
     }
   });
 

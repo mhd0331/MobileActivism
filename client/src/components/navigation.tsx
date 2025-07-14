@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Megaphone, PenTool, Lightbulb, FolderOpen, TrendingUp } from "lucide-react";
+import { useContentText } from "@/hooks/useWebContent";
 
 interface NavigationProps {
   currentSection: string;
@@ -7,12 +8,19 @@ interface NavigationProps {
 }
 
 export default function Navigation({ currentSection, onSectionChange }: NavigationProps) {
+  // Get content from database
+  const noticesTab = useContentText("navigation", "notices_tab", "공지사항");
+  const signatureTab = useContentText("navigation", "signature_tab", "서명하기");
+  const policiesTab = useContentText("navigation", "policies_tab", "정책제안");
+  const resourcesTab = useContentText("navigation", "resources_tab", "자료실");
+  const dashboardTab = useContentText("navigation", "dashboard_tab", "현황");
+
   const sections = [
-    { id: "notices", label: "공지사항", icon: Megaphone },
-    { id: "signature", label: "서명 운동", icon: PenTool },
-    { id: "policies", label: "정책 제안", icon: Lightbulb },
-    { id: "resources", label: "자료실", icon: FolderOpen },
-    { id: "dashboard", label: "진행 현황", icon: TrendingUp },
+    { id: "notices", label: noticesTab, icon: Megaphone },
+    { id: "signature", label: signatureTab, icon: PenTool },
+    { id: "policies", label: policiesTab, icon: Lightbulb },
+    { id: "resources", label: resourcesTab, icon: FolderOpen },
+    { id: "dashboard", label: dashboardTab, icon: TrendingUp },
   ];
 
   return (

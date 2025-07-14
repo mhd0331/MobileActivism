@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Mountain, UserCircle } from "lucide-react";
 import AuthModal from "./auth-modal";
 import { useState } from "react";
+import { useContentText } from "@/hooks/useWebContent";
 
 export default function Header() {
   const { data: auth, isLoading } = useAuth();
   const logout = useLogout();
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Get content from database
+  const siteTitle = useContentText("header", "site_title", "진안군 목조전망대 반대 캠페인");
+  const loginButton = useContentText("header", "login_button", "로그인");
+  const logoutButton = useContentText("header", "logout_button", "로그아웃");
 
   const handleLogout = () => {
     logout.mutate();
@@ -21,7 +27,7 @@ export default function Header() {
             <div className="flex items-center">
               <Mountain className="h-8 w-8 text-primary mr-3" />
               <h1 className="text-base sm:text-lg font-bold text-gray-900">
-                진안군 목조전망대 반대 캠페인
+                {siteTitle}
               </h1>
             </div>
             
@@ -42,14 +48,14 @@ export default function Header() {
                       size="sm"
                       disabled={logout.isPending}
                     >
-                      로그아웃
+                      {logoutButton}
                     </Button>
                   ) : (
                     <Button
                       onClick={() => setShowAuthModal(true)}
                       size="sm"
                     >
-                      로그인
+                      {loginButton}
                     </Button>
                   )}
                 </>

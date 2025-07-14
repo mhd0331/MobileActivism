@@ -13,10 +13,10 @@ export default function HeroSection({ onSectionChange }: HeroSectionProps) {
     queryKey: ["/api/stats"],
   });
 
-  // Get content from database - temporarily using fallback values
-  const mainTitle = "진안군 목조전망대 건설 반대";
-  const subtitle = "자연을 지키고 미래를 생각하는 선택"; 
-  const description = "지방자치법 위반 우려로 추진되는 130억원 규모의 목조전망대 건설을 반대합니다.";
+  // Get content from database
+  const mainTitle = useContentText("hero", "main_title", "진안군 목조전망대 건설 반대");
+  const subtitle = useContentText("hero", "subtitle", "자연을 지키고 미래를 생각하는 선택");
+  const description = useContentText("hero", "description", "지방자치법 위반 우려로 추진되는 130억원 규모의 목조전망대 건설을 반대합니다.");
 
   const handleButtonClick = (section: string) => {
     console.log(`Hero button clicked: ${section}`);

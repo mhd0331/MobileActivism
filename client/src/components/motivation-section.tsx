@@ -1,17 +1,50 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, DollarSign, TrendingDown, Scale, Users, Clock } from "lucide-react";
+import { useContentText } from "@/hooks/useWebContent";
 
 export default function MotivationSection() {
+  // Get content from database
+  const sectionTitle = useContentText("motivation", "section_title", "왜 서명해야 할까요?");
+  const sectionSubtitle = useContentText("motivation", "section_subtitle", "민주주의와 군민의 권익을 지키기 위한 세 가지 핵심 이유");
+  
+  // 민주주의 위기 카드 콘텐츠
+  const democracyCrisisTitle = useContentText("motivation", "democracy_crisis_title", "민주주의 위기");
+  const democracyCrisisSubtitle = useContentText("motivation", "democracy_crisis_subtitle", "🛑 이것은 민주주의입니까, 독재입니까?");
+  const democracyPoint1Title = useContentText("motivation", "democracy_point1_title", "의회, 사업에 강한 반대 의견 표명");
+  const democracyPoint1Content = useContentText("motivation", "democracy_point1_content", "295회 군의회에서 용역비 집행을 사업추진의 기본적인 타당성 확보 이후로 조건부 부결");
+  const democracyPoint2Title = useContentText("motivation", "democracy_point2_title", "군수, 독단 강행");
+  const democracyPoint2Content = useContentText("motivation", "democracy_point2_content", "의회의 반대 의견을 무릅쓰고 집행부 pool 예산을 사용하여 사업 강행\n지방자치법 제 55조를 위반하여 안건을 군의회에 사전 제출하지 않음");
+  const democracyPoint3Title = useContentText("motivation", "democracy_point3_title", "군민 대표권 훼손");
+  const democracyPoint3Content = useContentText("motivation", "democracy_point3_content", "형식적인 설문조사, 공청회 진행을 통한 민주적 절차 무시 및 의회 권한 침해.\n지방자치법 제 55조를 위반에 대한 군민과 군의회에 사과하지 않고 오히려 정당성 주장\n향후 이런 독재적 행정이 반복될 수 있음.");
+
+  // 예산 낭비 카드 콘텐츠
+  const budgetWasteTitle = useContentText("motivation", "budget_waste_title", "예산 낭비");
+  const budgetWasteSubtitle = useContentText("motivation", "budget_waste_subtitle", "💰 130억원의 무책임한 낭비");
+  const budgetPersonAmount = useContentText("motivation", "budget_person_amount", "178만원");
+  const budgetPersonLabel = useContentText("motivation", "budget_person_label", "군민 1인당 부담액");
+  const budgetFamilyAmount = useContentText("motivation", "budget_family_amount", "712만원");
+  const budgetFamilyLabel = useContentText("motivation", "budget_family_label", "4인 가족 기준 부담");
+  const budgetPopulation = useContentText("motivation", "budget_population", "진안군 인구 25,000명 기준");
+
+  // 실패 위험 카드 콘텐츠
+  const environmentTitle = useContentText("motivation", "environment_title", "또 실패하면?");
+  const failurePastTitle = useContentText("motivation", "failure_past_title", "과거: 마이산 케이블카");
+  const failurePastContent = useContentText("motivation", "failure_past_content", "29억원 손실 사업");
+  const failurePresentTitle = useContentText("motivation", "failure_present_title", "현재: 전망대 강행");
+  const failurePresentContent = useContentText("motivation", "failure_present_content", "445억원 위험 투자");
+  const failureFutureTitle = useContentText("motivation", "failure_future_title", "미래: 더 큰 부담?");
+  const failureFutureContent = useContentText("motivation", "failure_future_content", "지속적인 적자 운영 우려");
+
   return (
     <section className="py-12 bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h3 className="text-3xl font-bold text-gray-900 mb-4">
-            왜 서명해야 할까요?
+            {sectionTitle}
           </h3>
           <p className="text-lg text-gray-600">
-            민주주의와 군민의 권익을 지키기 위한 세 가지 핵심 이유
+            {sectionSubtitle}
           </p>
         </div>
 
@@ -25,13 +58,13 @@ export default function MotivationSection() {
                 </div>
                 <div>
                   <Badge variant="destructive" className="mb-2">긴급</Badge>
-                  <h4 className="text-xl font-bold text-gray-900">민주주의 위기</h4>
+                  <h4 className="text-xl font-bold text-gray-900">{democracyCrisisTitle}</h4>
                 </div>
               </div>
               
               <div className="space-y-6">
                 <div className="text-center mb-4">
-                  <h5 className="text-xl font-bold text-red-800 mb-2">🛑 이것은 민주주의입니까, 독재입니까?</h5>
+                  <h5 className="text-xl font-bold text-red-800 mb-2">{democracyCrisisSubtitle}</h5>
                 </div>
                 
                 <div className="space-y-4">
@@ -41,8 +74,8 @@ export default function MotivationSection() {
                         <span className="text-red-600 font-bold text-sm">1</span>
                       </div>
                       <div>
-                        <p className="font-bold text-red-800 mb-2">의회, 사업에 강한 반대 의견 표명</p>
-                        <p className="text-gray-700 text-sm">295회 군의회에서 용역비 집행을 사업추진의 기본적인 타당성 확보 이후로 조건부 부결</p>
+                        <p className="font-bold text-red-800 mb-2">{democracyPoint1Title}</p>
+                        <p className="text-gray-700 text-sm">{democracyPoint1Content}</p>
                       </div>
                     </div>
                   </div>
@@ -53,9 +86,10 @@ export default function MotivationSection() {
                         <span className="text-red-600 font-bold text-sm">2</span>
                       </div>
                       <div>
-                        <p className="font-bold text-red-800 mb-2">군수, 독단 강행</p>
-                        <p className="text-gray-700 text-sm mb-2">의회의 반대 의견을 무릅쓰고 집행부 pool 예산을 사용하여 사업 강행</p>
-                        <p className="text-gray-700 text-sm">지방자치법 제 55조를 위반하여 안건을 군의회에 사전 제출하지 않음</p>
+                        <p className="font-bold text-red-800 mb-2">{democracyPoint2Title}</p>
+                        {democracyPoint2Content.split('\n').map((line, idx) => (
+                          <p key={idx} className="text-gray-700 text-sm mb-2">{line}</p>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -66,10 +100,10 @@ export default function MotivationSection() {
                         <span className="text-red-600 font-bold text-sm">3</span>
                       </div>
                       <div>
-                        <p className="font-bold text-red-800 mb-2">군민 대표권 훼손</p>
-                        <p className="text-gray-700 text-sm mb-2">형식적인 설문조사, 공청회 진행을 통한 민주적 절차 무시 및 의회 권한 침해.</p>
-                        <p className="text-gray-700 text-sm mb-2">지방자치법 제 55조를 위반에 대한 군민과 군의회에 사과하지 않고 오히려 정당성 주장</p>
-                        <p className="text-gray-700 text-sm font-semibold text-red-700">향후 이런 독재적 행정이 반복될 수 있음.</p>
+                        <p className="font-bold text-red-800 mb-2">{democracyPoint3Title}</p>
+                        {democracyPoint3Content.split('\n').map((line, idx) => (
+                          <p key={idx} className={`text-gray-700 text-sm mb-2 ${idx === 2 ? 'font-semibold text-red-700' : ''}`}>{line}</p>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -87,28 +121,28 @@ export default function MotivationSection() {
                 </div>
                 <div>
                   <Badge className="bg-orange-100 text-orange-800 mb-2">경제적 부담</Badge>
-                  <h4 className="text-xl font-bold text-gray-900">445억 혈세 폭탄</h4>
+                  <h4 className="text-xl font-bold text-gray-900">{budgetWasteTitle}</h4>
                 </div>
               </div>
               
               <div className="space-y-4">
                 <div className="bg-orange-50 p-4 rounded-lg">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-orange-600">178만원</div>
-                    <div className="text-sm text-gray-600">군민 1인당 부담액</div>
+                    <div className="text-3xl font-bold text-orange-600">{budgetPersonAmount}</div>
+                    <div className="text-sm text-gray-600">{budgetPersonLabel}</div>
                   </div>
                 </div>
                 
                 <div className="bg-orange-50 p-4 rounded-lg">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-orange-600">712만원</div>
-                    <div className="text-sm text-gray-600">4인 가족 기준 부담</div>
+                    <div className="text-3xl font-bold text-orange-600">{budgetFamilyAmount}</div>
+                    <div className="text-sm text-gray-600">{budgetFamilyLabel}</div>
                   </div>
                 </div>
                 
                 <div className="text-center text-xs text-gray-500">
                   <Users className="h-4 w-4 inline mr-1" />
-                  진안군 인구 25,000명 기준
+                  {budgetPopulation}
                 </div>
               </div>
             </CardContent>
@@ -123,7 +157,7 @@ export default function MotivationSection() {
                 </div>
                 <div>
                   <Badge className="bg-yellow-100 text-yellow-800 mb-2">위험 경고</Badge>
-                  <h4 className="text-xl font-bold text-gray-900">또 실패하면?</h4>
+                  <h4 className="text-xl font-bold text-gray-900">{environmentTitle}</h4>
                 </div>
               </div>
               
@@ -131,24 +165,24 @@ export default function MotivationSection() {
                 <div className="flex items-start">
                   <Clock className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-yellow-800">과거: 마이산 케이블카</p>
-                    <p className="text-gray-700 text-sm">29억원 손실 사업</p>
+                    <p className="font-semibold text-yellow-800">{failurePastTitle}</p>
+                    <p className="text-gray-700 text-sm">{failurePastContent}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
                   <TrendingDown className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-yellow-800">현재: 전망대 강행</p>
-                    <p className="text-gray-700 text-sm">445억원 위험 투자</p>
+                    <p className="font-semibold text-yellow-800">{failurePresentTitle}</p>
+                    <p className="text-gray-700 text-sm">{failurePresentContent}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
                   <AlertTriangle className="h-5 w-5 text-yellow-500 mt-1 mr-3 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-yellow-800">미래: 더 큰 부담?</p>
-                    <p className="text-gray-700 text-sm">지속적인 적자 운영 우려</p>
+                    <p className="font-semibold text-yellow-800">{failureFutureTitle}</p>
+                    <p className="text-gray-700 text-sm">{failureFutureContent}</p>
                   </div>
                 </div>
               </div>

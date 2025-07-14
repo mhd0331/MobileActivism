@@ -320,11 +320,43 @@ export default function AdminPage() {
           {/* Web Content Management */}
           <TabsContent value="content" className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>웹 콘텐츠 관리</CardTitle>
-                <CardDescription>
-                  웹사이트의 텍스트 콘텐츠를 관리합니다. 서명 관련 통계는 자동 계산되므로 편집할 수 없습니다.
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>웹 콘텐츠 관리</CardTitle>
+                  <CardDescription>
+                    웹사이트의 텍스트 콘텐츠를 관리합니다. 서명 관련 통계는 자동 계산되므로 편집할 수 없습니다.
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch("/api/admin/initialize-content", {
+                        method: "POST",
+                        credentials: "include",
+                      });
+                      if (response.ok) {
+                        toast({
+                          title: "성공",
+                          description: "웹 콘텐츠가 초기화되었습니다.",
+                        });
+                        // Refresh content list
+                        queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
+                      } else {
+                        throw new Error("초기화 실패");
+                      }
+                    } catch (error) {
+                      toast({
+                        title: "오류",
+                        description: "웹 콘텐츠 초기화에 실패했습니다.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  콘텐츠 초기화
+                </Button>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Add Content Form */}
