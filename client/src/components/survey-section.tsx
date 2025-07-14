@@ -53,22 +53,22 @@ export default function SurveySection() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState(false);
 
-  // Fixed UI text (no need to store in database)
-  const noSurveyTitle = "현재 진행 중인 여론조사가 없습니다";
-  const noSurveyDescription = "새로운 여론조사가 시작되면 알려드리겠습니다.";
-  const resultsTitle = "여론조사 결과";
-  const totalResponsesLabel = "총 응답수";
-  const participationRateLabel = "참여율";
-  const averageTimeLabel = "평균 소요시간";
-  const backToSurveyButton = "여론조사 참여하기";
-  const completionTitle = "여론조사 응답이 완료되었습니다!";
-  const completionDescription = "소중한 의견을 주셔서 감사합니다. 여러분의 참여가 진안군의 미래를 만들어갑니다.";
-  const viewResultsButton = "결과 보기";
-  const participateAgainButton = "다시 참여하기";
-  const previousButton = "이전";
-  const nextButton = "다음";
-  const submitButton = "제출하기";
-  const requiredFieldError = "필수 문항입니다. 답변을 선택해주세요.";
+  // Fetch survey content from database
+  const { data: surveyContent } = useQuery({
+    queryKey: ["/api/web-content", "survey"],
+    queryFn: async () => {
+      const response = await fetch("/api/web-content?section=survey");
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 300000, // 5 minutes cache
+  });
+
+  // Helper function to get content by key
+  const getContent = (key: string, fallback: string = "") => {
+    const item = surveyContent?.content?.find((c: any) => c.key === key);
+    return item?.content || fallback;
+  };
 
 
 
@@ -305,10 +305,10 @@ export default function SurveySection() {
               <CardContent className="p-8 text-center">
                 <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  {noSurveyTitle}
+                  {getContent("no_survey_title", "현재 진행 중인 여론조사가 없습니다")}
                 </h3>
                 <p className="text-gray-500">
-                  {noSurveyDescription}
+                  {getContent("no_survey_description", "새로운 여론조사가 시작되면 알려드리겠습니다.")}
                 </p>
               </CardContent>
             </Card>
@@ -326,7 +326,7 @@ export default function SurveySection() {
           <div className="max-w-6xl mx-auto space-y-8">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                {resultsTitle}
+                {getContent("results_title", "여론조사 결과")}
               </h1>
               <p className="text-xl text-gray-600">
                 {survey.title}
@@ -341,7 +341,7 @@ export default function SurveySection() {
                   <div className="text-2xl font-bold text-blue-600">
                     {results.totalResponses.toLocaleString()}
                   </div>
-                  <p className="text-sm text-gray-500">{totalResponsesLabel}</p>
+                  <p className="text-sm text-gray-500">{getContent("total_responses_label", "총 응답수")}</p>
                 </CardContent>
               </Card>
               
@@ -351,7 +351,7 @@ export default function SurveySection() {
                   <div className="text-2xl font-bold text-green-600">
                     {results.participationRate}%
                   </div>
-                  <p className="text-sm text-gray-500">{participationRateLabel}</p>
+                  <p className="text-sm text-gray-500">{getContent("participation_rate_label", "참여율")}</p>
                 </CardContent>
               </Card>
               
@@ -361,7 +361,7 @@ export default function SurveySection() {
                   <div className="text-2xl font-bold text-orange-600">
                     {results.averageTime}분
                   </div>
-                  <p className="text-sm text-gray-500">{averageTimeLabel}</p>
+                  <p className="text-sm text-gray-500">{getContent("average_time_label", "평균 소요시간")}</p>
                 </CardContent>
               </Card>
             </div>
@@ -405,7 +405,7 @@ export default function SurveySection() {
                 variant="outline"
                 size="lg"
               >
-                {backToSurveyButton}
+                {getContent("back_to_survey_button", "여론조사 참여하기")}
               </Button>
             </div>
           </div>
@@ -424,17 +424,17 @@ export default function SurveySection() {
               <CardContent className="p-8 text-center">
                 <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  {completionTitle}
+                  {getContent("completion_title", "여론조사 응답이 완료되었습니다!")}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {completionDescription}
+                  {getContent("completion_description", "소중한 의견을 주셔서 감사합니다. 여러분의 참여가 진안군의 미래를 만들어갑니다.")}
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Button
                     onClick={() => setShowResults(true)}
                     variant="outline"
                   >
-                    {viewResultsButton}
+                    {getContent("view_results_button", "결과 보기")}
                   </Button>
                   <Button
                     onClick={() => {
@@ -443,7 +443,7 @@ export default function SurveySection() {
                       setAnswers({});
                     }}
                   >
-                    {participateAgainButton}
+                    {getContent("participate_again_button", "다시 참여하기")}
                   </Button>
                 </div>
               </CardContent>
@@ -473,9 +473,9 @@ export default function SurveySection() {
                 <div className="flex items-start">
                   <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                   <div className="text-sm text-left">
-                    <p className="font-medium text-blue-800">이미 참여하셨습니다</p>
+                    <p className="font-medium text-blue-800">{getContent("already_participated_title", "이미 참여하셨습니다")}</p>
                     <p className="text-blue-700 mt-1">
-                      이전에 제출한 응답이 있습니다. 다시 참여하시면 이전 응답이 새로운 응답으로 교체됩니다.
+                      {getContent("already_participated_description", "이전에 제출한 응답이 있습니다. 다시 참여하시면 이전 응답이 새로운 응답으로 교체됩니다.")}
                     </p>
                   </div>
                 </div>
@@ -487,7 +487,7 @@ export default function SurveySection() {
                 onClick={() => setShowResults(true)}
                 variant="outline"
               >
-                결과 먼저 보기
+                {getContent("results_preview_button", "결과 먼저 보기")}
               </Button>
             </div>
           </div>
@@ -496,7 +496,7 @@ export default function SurveySection() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">진행률</span>
+                <span className="text-sm font-medium">{getContent("progress_label", "진행률")}</span>
                 <span className="text-sm text-gray-500">
                   {currentQuestionIndex + 1} / {survey.questions.length}
                 </span>
@@ -511,10 +511,10 @@ export default function SurveySection() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <Badge variant="outline">
-                    질문 {currentQuestionIndex + 1}
+                    {getContent("question_label", "질문")} {currentQuestionIndex + 1}
                   </Badge>
                   {currentQuestion.isRequired && (
-                    <Badge variant="destructive">필수</Badge>
+                    <Badge variant="destructive">{getContent("required_badge", "필수")}</Badge>
                   )}
                 </div>
                 <CardTitle className="text-xl leading-relaxed">
@@ -571,7 +571,7 @@ export default function SurveySection() {
                   <Textarea
                     value={answers[currentQuestion.id] || ""}
                     onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                    placeholder="의견을 자유롭게 작성해주세요..."
+                    placeholder={getContent("text_input_placeholder", "의견을 자유롭게 작성해주세요...")}
                     rows={4}
                   />
                 )}
@@ -583,7 +583,7 @@ export default function SurveySection() {
                     variant="outline"
                     disabled={currentQuestionIndex === 0}
                   >
-                    {previousButton}
+                    {getContent("previous_button", "이전")}
                   </Button>
                   
                   <Button
@@ -591,7 +591,7 @@ export default function SurveySection() {
                     disabled={currentQuestion.isRequired && !isCurrentAnswered}
                     className="min-w-[100px]"
                   >
-                    {currentQuestionIndex === survey.questions.length - 1 ? submitButton : nextButton}
+                    {currentQuestionIndex === survey.questions.length - 1 ? getContent("submit_button", "제출하기") : getContent("next_button", "다음")}
                   </Button>
                 </div>
               </CardContent>
