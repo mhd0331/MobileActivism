@@ -124,8 +124,15 @@ export default function SurveySection() {
       queryClient.invalidateQueries({ queryKey: ["/api/surveys"] });
     },
     onError: (error: any) => {
-      if (error.message.includes("401")) {
-        setShowAuthModal(true);
+      console.error("Survey submission error:", error);
+      if (error.message.includes("401") || error.message.includes("Unauthorized")) {
+        // Re-check auth state before showing modal
+        queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+        setTimeout(() => {
+          if (!auth?.user) {
+            setShowAuthModal(true);
+          }
+        }, 100);
         return;
       }
       toast({
@@ -199,7 +206,7 @@ export default function SurveySection() {
     if (!survey) return;
 
     // Check if user is logged in first (using auth from useAuth hook)
-    if (!auth?.user) {
+    if (!auth?.user || auth.isLoading) {
       setShowAuthModal(true);
       return;
     }
@@ -220,9 +227,14 @@ export default function SurveySection() {
   // Handle successful login - exactly same as signature section
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
+    // Invalidate auth queries to refresh user state
+    queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    
     // Attempt submission after successful login with delay (same as signature)
     setTimeout(() => {
-      if (!survey) return;
+      // Re-check auth state before attempting submission
+      if (!survey || !auth?.user) return;
       
       // Prepare answers for submission
       const submissionAnswers = Object.entries(answers).map(([questionId, value]) => ({
@@ -235,7 +247,7 @@ export default function SurveySection() {
         surveyId: survey.id,
         answers: submissionAnswers
       });
-    }, 500);
+    }, 1500); // Increased delay to allow auth state to update
   };
 
   const isCurrentAnswered = currentQuestion ? 
