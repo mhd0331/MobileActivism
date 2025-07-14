@@ -126,8 +126,8 @@ export default function SurveySection() {
       });
     },
     onError: (error: any) => {
-      if (error.message.includes("401")) {
-        // Show login modal instead of error toast
+      if (error.message.includes("401") && !pendingSubmission) {
+        // Only show login modal if not already in pending submission state
         setPendingSubmission(true);
         setShowAuthModal(true);
       } else {
@@ -239,7 +239,10 @@ export default function SurveySection() {
         description: "여론조사를 제출하는 중입니다...",
       });
       
-      // Wait a moment and then submit directly without checking user state again
+      // Refresh user data first, then submit
+      await refetchUser();
+      
+      // Wait a moment for auth state to update, then submit
       setTimeout(async () => {
         if (!survey) return;
         
@@ -251,9 +254,27 @@ export default function SurveySection() {
             selectedOptions: Array.isArray(value) ? value : null
           }));
 
-          await submitSurveyMutation.mutateAsync({
-            surveyId: survey.id,
-            answers: submissionAnswers
+          // Direct API call instead of using mutation to avoid the 401 error handling loop
+          const response = await fetch("/api/surveys/responses", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              surveyId: survey.id,
+              answers: submissionAnswers
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`제출 실패: ${response.status}`);
+          }
+
+          // Success - update UI
+          setIsSubmitted(true);
+          toast({
+            title: "성공",
+            description: "여론조사 응답이 제출되었습니다.",
           });
         } catch (error) {
           console.error('Submit error after login:', error);
@@ -263,7 +284,7 @@ export default function SurveySection() {
             variant: "destructive",
           });
         }
-      }, 1000);
+      }, 1500);
     } else {
       toast({
         title: "로그인 완료",
