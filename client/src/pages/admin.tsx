@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, LogOut, Shield, FileText, Calendar, Users, Globe, BarChart3 } from "lucide-react";
+import { Trash2, Edit, Plus, LogOut, Shield, FileText, Calendar, Users, Globe, BarChart3, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import AdminLoginModal from "@/components/admin-login-modal";
@@ -201,6 +201,71 @@ export default function AdminPage() {
     metadata: "{}"
   });
   const [editingContent, setEditingContent] = useState<any>(null);
+  const [editingWebContent, setEditingWebContent] = useState<any>(null);
+
+  // Initialize web content
+  const initializeContentMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/admin/initialize-content", {});
+      if (!response.ok) {
+        throw new Error("Failed to initialize content");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "성공",
+        description: "웹 콘텐츠가 초기화되었습니다.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/web-content"] });
+    },
+    onError: () => {
+      toast({
+        title: "오류",
+        description: "콘텐츠 초기화에 실패했습니다.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Initialize survey content
+  const initializeSurveyContentMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/admin/initialize-survey-content", {});
+      if (!response.ok) {
+        throw new Error("Failed to initialize survey content");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "성공",
+        description: "여론조사 콘텐츠가 초기화되었습니다.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/web-content", "survey"] });
+    },
+    onError: () => {
+      toast({
+        title: "오류",
+        description: "여론조사 콘텐츠 초기화에 실패했습니다.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Query survey content
+  const surveyContentQuery = useQuery({
+    queryKey: ["/api/web-content", "survey"],
+    queryFn: async () => {
+      const response = await fetch("/api/web-content?section=survey");
+      if (!response.ok) {
+        throw new Error("Failed to fetch survey content");
+      }
+      return response.json();
+    },
+    staleTime: 0,
+    enabled: isAuthenticated,
+  });
 
   if (!isAuthenticated) {
     return (
@@ -782,23 +847,67 @@ export default function AdminPage() {
           <TabsContent value="surveys" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  여론조사 관리
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    여론조사 관리
+                  </div>
+                  <Button
+                    onClick={() => initializeSurveyContentMutation.mutate()}
+                    disabled={initializeSurveyContentMutation.isPending}
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${initializeSurveyContentMutation.isPending ? 'animate-spin' : ''}`} />
+                    여론조사 콘텐츠 초기화
+                  </Button>
                 </CardTitle>
                 <CardDescription>
-                  여론조사 질문과 응답을 관리합니다. 실제 여론조사 본문 내용만 관리하며, UI 텍스트는 시스템에서 자동 관리됩니다.
+                  여론조사 섹션의 텍스트 콘텐츠를 관리합니다. 실제 설문 질문은 별도 시스템에서 관리됩니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center text-gray-500 py-8">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">여론조사 질문 관리</h3>
-                  <p className="text-sm">
-                    여론조사 질문과 선택지는 별도의 설문조사 시스템에서 관리됩니다.<br/>
-                    UI 텍스트(버튼, 라벨 등)는 코드에서 직접 관리되어 안정성을 보장합니다.
-                  </p>
-                </div>
+                {surveyContentQuery.isLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p className="text-gray-500">여론조사 콘텐츠를 불러오는 중...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {surveyContentQuery.data?.content?.map((item: any) => (
+                      <Card key={item.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-sm mb-1">{item.title}</h4>
+                              <p className="text-xs text-gray-500 mb-2">키: {item.key}</p>
+                              <p className="text-sm text-gray-700 line-clamp-3">{item.content}</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingWebContent(item)}
+                              className="ml-2"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) || []}
+                    
+                    {(!surveyContentQuery.data?.content || surveyContentQuery.data.content.length === 0) && (
+                      <div className="col-span-full text-center text-gray-500 py-8">
+                        <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p className="mb-4">여론조사 콘텐츠가 없습니다.</p>
+                        <p className="text-sm text-gray-400">
+                          "여론조사 콘텐츠 초기화" 버튼을 눌러 기본 콘텐츠를 생성하세요.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
