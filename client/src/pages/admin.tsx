@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, LogOut, Shield, FileText, Calendar, Users, Globe } from "lucide-react";
+import { Trash2, Edit, Plus, LogOut, Shield, FileText, Calendar, Users, Globe, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import AdminLoginModal from "@/components/admin-login-modal";
@@ -314,11 +314,12 @@ export default function AdminPage() {
 
         {/* Management Tabs */}
         <Tabs defaultValue="content" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="content">웹 콘텐츠 관리</TabsTrigger>
             <TabsTrigger value="notices">공지사항 관리</TabsTrigger>
             <TabsTrigger value="resources">자료 관리</TabsTrigger>
             <TabsTrigger value="policies">정책 관리</TabsTrigger>
+            <TabsTrigger value="surveys">여론조사 관리</TabsTrigger>
           </TabsList>
 
           {/* Web Content Management */}
@@ -417,6 +418,7 @@ export default function AdminPage() {
                             <SelectItem value="policies">정책 섹션</SelectItem>
                             <SelectItem value="resources">자료 섹션</SelectItem>
                             <SelectItem value="notices">공지사항 섹션</SelectItem>
+                            <SelectItem value="survey">여론조사 섹션</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -799,6 +801,101 @@ export default function AdminPage() {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Survey Content Management */}
+          <TabsContent value="surveys" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    여론조사 문구 관리
+                  </span>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await apiRequest("POST", "/api/admin/initialize-survey-content");
+                        if (response.ok) {
+                          queryClient.invalidateQueries({ queryKey: ['/api/web-content'] });
+                          toast({
+                            title: "성공",
+                            description: "여론조사 문구가 초기화되었습니다.",
+                          });
+                        } else {
+                          throw new Error("초기화 실패");
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "오류",
+                          description: "여론조사 문구 초기화에 실패했습니다.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    여론조사 문구 초기화
+                  </Button>
+                </CardTitle>
+                <CardDescription>
+                  여론조사 페이지에 표시되는 모든 텍스트를 관리합니다. 수정된 내용은 즉시 웹사이트에 반영됩니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Survey Content List */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">여론조사 관련 문구</h3>
+                  {Array.isArray(webContent) ? (
+                    webContent.filter((item: any) => item.section === 'survey').length > 0 ? (
+                      webContent.filter((item: any) => item.section === 'survey').map((item: any) => (
+                        <Card key={item.id} className="border-l-4 border-l-purple-500">
+                          <CardContent className="pt-6">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <Badge variant="outline" className="bg-purple-50">여론조사</Badge>
+                                  <Badge variant="secondary">{item.key}</Badge>
+                                </div>
+                                {item.title && <h4 className="font-medium">{item.title}</h4>}
+                                <p className="text-sm text-gray-600">{item.content}</p>
+                                <p className="text-xs text-gray-400">
+                                  수정: {format(new Date(item.updatedAt || item.createdAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                                </p>
+                              </div>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEditingContent(item)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <Card>
+                        <CardContent className="p-8 text-center">
+                          <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500 mb-4">
+                            여론조사 문구가 등록되지 않았습니다.
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            "여론조사 문구 초기화" 버튼을 눌러 기본 문구를 생성하세요.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )
+                  ) : (
+                    <p className="text-center text-gray-500 py-8">콘텐츠를 불러오는 중...</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

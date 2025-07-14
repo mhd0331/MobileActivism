@@ -13,6 +13,15 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/auth-modal";
 
+// Hook to get survey content from database
+function useSurveyContent(key: string) {
+  const { data } = useQuery({
+    queryKey: [`/api/web-content/survey/${key}`],
+    retry: false,
+  });
+  return data?.content?.content || "";
+}
+
 interface SurveyQuestion {
   id: number;
   questionText: string;
@@ -50,6 +59,23 @@ export default function SurveySection() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState(false);
+
+  // Get survey content from database
+  const noSurveyTitle = useSurveyContent("no_survey_title") || "현재 진행 중인 여론조사가 없습니다";
+  const noSurveyDescription = useSurveyContent("no_survey_description") || "새로운 여론조사가 시작되면 알려드리겠습니다.";
+  const resultsTitle = useSurveyContent("results_title") || "여론조사 결과";
+  const totalResponsesLabel = useSurveyContent("total_responses_label") || "총 응답수";
+  const participationRateLabel = useSurveyContent("participation_rate_label") || "참여율";
+  const averageTimeLabel = useSurveyContent("average_time_label") || "평균 소요시간";
+  const backToSurveyButton = useSurveyContent("back_to_survey_button") || "여론조사 참여하기";
+  const completionTitle = useSurveyContent("completion_title") || "여론조사 응답이 완료되었습니다!";
+  const completionDescription = useSurveyContent("completion_description") || "소중한 의견을 주셔서 감사합니다. 여러분의 참여가 진안군의 미래를 만들어갑니다.";
+  const viewResultsButton = useSurveyContent("view_results_button") || "결과 보기";
+  const participateAgainButton = useSurveyContent("participate_again_button") || "다시 참여하기";
+  const previousButton = useSurveyContent("previous_button") || "이전";
+  const nextButton = useSurveyContent("next_button") || "다음";
+  const submitButton = useSurveyContent("submit_button") || "제출하기";
+  const requiredFieldError = useSurveyContent("required_field_error") || "필수 문항입니다. 답변을 선택해주세요.";
 
   // Fetch active survey
   const { data: survey, isLoading: surveyLoading, error: surveyError } = useQuery({
@@ -282,10 +308,10 @@ export default function SurveySection() {
               <CardContent className="p-8 text-center">
                 <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  현재 진행 중인 여론조사가 없습니다
+                  {noSurveyTitle}
                 </h3>
                 <p className="text-gray-500">
-                  새로운 여론조사가 시작되면 알려드리겠습니다.
+                  {noSurveyDescription}
                 </p>
               </CardContent>
             </Card>
@@ -303,7 +329,7 @@ export default function SurveySection() {
           <div className="max-w-6xl mx-auto space-y-8">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                여론조사 결과
+                {resultsTitle}
               </h1>
               <p className="text-xl text-gray-600">
                 {survey.title}
@@ -318,7 +344,7 @@ export default function SurveySection() {
                   <div className="text-2xl font-bold text-blue-600">
                     {results.totalResponses.toLocaleString()}
                   </div>
-                  <p className="text-sm text-gray-500">총 응답수</p>
+                  <p className="text-sm text-gray-500">{totalResponsesLabel}</p>
                 </CardContent>
               </Card>
               
@@ -328,7 +354,7 @@ export default function SurveySection() {
                   <div className="text-2xl font-bold text-green-600">
                     {results.participationRate}%
                   </div>
-                  <p className="text-sm text-gray-500">참여율</p>
+                  <p className="text-sm text-gray-500">{participationRateLabel}</p>
                 </CardContent>
               </Card>
               
@@ -338,7 +364,7 @@ export default function SurveySection() {
                   <div className="text-2xl font-bold text-orange-600">
                     {results.averageTime}분
                   </div>
-                  <p className="text-sm text-gray-500">평균 소요시간</p>
+                  <p className="text-sm text-gray-500">{averageTimeLabel}</p>
                 </CardContent>
               </Card>
             </div>
@@ -382,7 +408,7 @@ export default function SurveySection() {
                 variant="outline"
                 size="lg"
               >
-                여론조사 참여하기
+                {backToSurveyButton}
               </Button>
             </div>
           </div>
@@ -401,17 +427,17 @@ export default function SurveySection() {
               <CardContent className="p-8 text-center">
                 <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  여론조사 응답이 완료되었습니다!
+                  {completionTitle}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  소중한 의견을 주셔서 감사합니다. 여러분의 참여가 진안군의 미래를 만들어갑니다.
+                  {completionDescription}
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Button
                     onClick={() => setShowResults(true)}
                     variant="outline"
                   >
-                    결과 보기
+                    {viewResultsButton}
                   </Button>
                   <Button
                     onClick={() => {
@@ -420,7 +446,7 @@ export default function SurveySection() {
                       setAnswers({});
                     }}
                   >
-                    다시 참여하기
+                    {participateAgainButton}
                   </Button>
                 </div>
               </CardContent>
@@ -560,7 +586,7 @@ export default function SurveySection() {
                     variant="outline"
                     disabled={currentQuestionIndex === 0}
                   >
-                    이전
+                    {previousButton}
                   </Button>
                   
                   <Button
@@ -568,7 +594,7 @@ export default function SurveySection() {
                     disabled={currentQuestion.isRequired && !isCurrentAnswered}
                     className="min-w-[100px]"
                   >
-                    {currentQuestionIndex === survey.questions.length - 1 ? "제출" : "다음"}
+                    {currentQuestionIndex === survey.questions.length - 1 ? submitButton : nextButton}
                   </Button>
                 </div>
               </CardContent>

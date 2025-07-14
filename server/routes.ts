@@ -479,6 +479,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Survey Content Initialization (Admin only)
+  app.post("/api/admin/initialize-survey-content", requireAdminAuth, async (req, res) => {
+    try {
+      console.log("여론조사 문구 초기화 시작...");
+      
+      const surveyContent = [
+        // Error states
+        { section: "survey", key: "no_survey_title", title: "진행 중인 여론조사 없음", content: "현재 진행 중인 여론조사가 없습니다" },
+        { section: "survey", key: "no_survey_description", title: "알림 메시지", content: "새로운 여론조사가 시작되면 알려드리겠습니다." },
+        
+        // Results view
+        { section: "survey", key: "results_title", title: "결과 페이지 제목", content: "여론조사 결과" },
+        { section: "survey", key: "total_responses_label", title: "통계 라벨", content: "총 응답수" },
+        { section: "survey", key: "participation_rate_label", title: "통계 라벨", content: "참여율" },
+        { section: "survey", key: "average_time_label", title: "통계 라벨", content: "평균 소요시간" },
+        { section: "survey", key: "back_to_survey_button", title: "버튼 텍스트", content: "여론조사 참여하기" },
+        
+        // Completion state
+        { section: "survey", key: "completion_title", title: "완료 메시지", content: "여론조사 응답이 완료되었습니다!" },
+        { section: "survey", key: "completion_description", title: "감사 메시지", content: "소중한 의견을 주셔서 감사합니다. 여러분의 참여가 진안군의 미래를 만들어갑니다." },
+        { section: "survey", key: "view_results_button", title: "버튼 텍스트", content: "결과 보기" },
+        { section: "survey", key: "participate_again_button", title: "버튼 텍스트", content: "다시 참여하기" },
+        
+        // Survey form
+        { section: "survey", key: "previous_button", title: "버튼 텍스트", content: "이전" },
+        { section: "survey", key: "next_button", title: "버튼 텍스트", content: "다음" },
+        { section: "survey", key: "submit_button", title: "버튼 텍스트", content: "제출하기" },
+        { section: "survey", key: "required_field_error", title: "오류 메시지", content: "필수 문항입니다. 답변을 선택해주세요." },
+        
+        // Authentication prompts
+        { section: "survey", key: "login_required_title", title: "로그인 필요", content: "로그인이 필요합니다" },
+        { section: "survey", key: "login_required_description", title: "로그인 안내", content: "여론조사에 참여하려면 로그인이 필요합니다." },
+        { section: "survey", key: "login_button", title: "버튼 텍스트", content: "로그인하기" }
+      ];
+
+      for (const content of surveyContent) {
+        const existing = await storage.getWebContentByKey(content.section, content.key);
+        if (!existing) {
+          await storage.createWebContent(content);
+          console.log(`생성함: ${content.section}/${content.key}`);
+        } else {
+          console.log(`이미 존재함: ${content.section}/${content.key}`);
+        }
+      }
+
+      console.log("여론조사 문구 초기화 완료!");
+      res.json({ message: "Survey content initialized successfully" });
+    } catch (error) {
+      console.error("Survey content initialization error:", error);
+      res.status(500).json({ message: "Failed to initialize survey content" });
+    }
+  });
+
   // Survey Routes
   app.get("/api/surveys/active", async (req, res) => {
     try {
