@@ -84,6 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ message: "Session save failed" });
         } else {
           console.log('Session saved successfully');
+          console.log('Final session state:', req.session);
           res.json({ user: { id: user.id, name: user.name, phone: user.phone, district: user.district } });
         }
       });

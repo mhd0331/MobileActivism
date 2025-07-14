@@ -12,11 +12,17 @@ export async function apiRequest(
   url: string,
   data?: any
 ): Promise<Response> {
+  console.log(`Making ${method} request to ${url}`, data ? { data } : {});
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
+  });
+  console.log(`Response from ${method} ${url}:`, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: Object.fromEntries(res.headers.entries())
   });
 
   return res;

@@ -46,14 +46,20 @@ export function useLogin() {
       console.log("Login successful, result:", result);
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Login onSuccess triggered with data:", data);
       // Force invalidate and refetch user data immediately
       queryClient.removeQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/signatures/check"] });
       queryClient.invalidateQueries({ queryKey: ["/api/surveys"] });
-      // Force immediate refetch of auth state
-      queryClient.refetchQueries({ queryKey: ["/api/me"] });
+      
+      // Force immediate refetch of auth state with a small delay
+      setTimeout(async () => {
+        console.log("Refetching auth queries after login...");
+        await queryClient.refetchQueries({ queryKey: ["/api/me"] });
+        console.log("Auth refetch completed");
+      }, 100);
     },
   });
 }
