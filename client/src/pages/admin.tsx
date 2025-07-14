@@ -258,15 +258,16 @@ export default function AdminPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="border-blue-200 bg-blue-50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">총 서명수</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-blue-700">총 서명수 (읽기 전용)</CardTitle>
+              <Users className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
                 {stats?.stats?.signatureCount?.toLocaleString() || 0}
               </div>
+              <p className="text-xs text-blue-500 mt-1">자동 계산된 값입니다</p>
             </CardContent>
           </Card>
           
@@ -322,7 +323,7 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle>웹 콘텐츠 관리</CardTitle>
                 <CardDescription>
-                  웹사이트의 모든 텍스트 콘텐츠를 관리합니다. 섹션별로 구분되어 있으며 실시간으로 웹사이트에 반영됩니다.
+                  웹사이트의 텍스트 콘텐츠를 관리합니다. 서명 관련 통계는 자동 계산되므로 편집할 수 없습니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -348,6 +349,7 @@ export default function AdminPage() {
                             <SelectItem value="footer">푸터</SelectItem>
                             <SelectItem value="policies">정책 섹션</SelectItem>
                             <SelectItem value="resources">자료 섹션</SelectItem>
+                            <SelectItem value="notices">공지사항 섹션</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -378,7 +380,19 @@ export default function AdminPage() {
                       />
                     </div>
                     <Button 
-                      onClick={() => createWebContentMutation.mutate(contentForm)}
+                      onClick={() => {
+                        // 서명 관련 키워드 필터링
+                        if (contentForm.key.includes('signature') || contentForm.key.includes('sign') || 
+                            contentForm.content.includes('서명') || contentForm.section === 'signature') {
+                          toast({ 
+                            title: "오류", 
+                            description: "서명 관련 콘텐츠는 편집할 수 없습니다. 서명 통계는 자동으로 계산됩니다.",
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+                        createWebContentMutation.mutate(contentForm);
+                      }}
                       disabled={createWebContentMutation.isPending || !contentForm.section || !contentForm.key || !contentForm.content}
                       className="w-full"
                     >
@@ -390,7 +404,7 @@ export default function AdminPage() {
                 {/* Content List */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">등록된 콘텐츠</h3>
-                  {webContent?.content?.map((item: any) => (
+                  {webContent?.content?.filter((item: any) => item.section !== 'signature')?.map((item: any) => (
                     <Card key={item.id}>
                       <CardContent className="pt-6">
                         <div className="flex justify-between items-start">

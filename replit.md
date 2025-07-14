@@ -111,3 +111,12 @@ Core entities include:
 - **Caching**: Service worker caches static assets and API responses
 - **Image Optimization**: PWA icons in multiple sizes
 - **Bundle Size**: Selective imports and tree shaking reduce bundle size
+
+## Recent Changes (July 14, 2025)
+
+### Admin Panel Signature Restriction
+- **Signature Data Protection**: Removed all signature editing capabilities from admin CMS
+- **Read-only Statistics**: Signature count is now displayed as read-only statistic only
+- **Content Filtering**: Signature-related content cannot be created or edited via web content management
+- **Automatic Calculation**: All signature statistics are automatically calculated from database
+- **User Intent**: Ensures signature campaign data integrity and prevents unauthorized modifications
