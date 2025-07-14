@@ -57,20 +57,13 @@ export function useLogin() {
       queryClient.invalidateQueries({ queryKey: ["/api/signatures/check"] });
       queryClient.invalidateQueries({ queryKey: ["/api/surveys"] });
       
-      // Force complete cookie reset and browser refresh
-      if (data.sessionId) {
-        console.log("Login successful with session ID:", data.sessionId);
+      // Complete browser state reset after login
+      if (data.message === "Login successful, reload page") {
+        console.log("Login successful, forcing page reload...");
         
-        // Clear ALL cookies for this domain
-        document.cookie.split(";").forEach(function(c) { 
-          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-        });
-        
-        // Wait briefly and reload page to ensure clean state
-        setTimeout(() => {
-          console.log("Reloading page for fresh session...");
-          window.location.reload();
-        }, 100);
+        // Immediate page reload to reset all browser state
+        window.location.reload();
+        return; // Exit early to prevent further processing
       }
       
       // Immediate and aggressive refetch of auth state

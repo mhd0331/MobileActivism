@@ -36,8 +36,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax', // Standard setting
       domain: undefined // Let browser handle domain
-    }
+    },
+    name: 'connect.sid', // Explicitly set session name
+    rolling: true // Reset expiration on each request
   }));
+  
+  // Force clear old cookies middleware
+  app.use((req, res, next) => {
+    // Clear any existing session cookies that don't match current session
+    if (req.headers.cookie && req.headers.cookie.includes('connect.sid') && !req.session.userId) {
+      res.clearCookie('connect.sid', { path: '/' });
+      console.log('Cleared invalid session cookie');
+    }
+    next();
+  });
 
   // Authentication middleware
   const requireAuth = (req: any, res: any, next: any) => {
@@ -91,21 +103,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('Session saved successfully');
           console.log('Final session state:', req.session);
           
-          // Clear any existing cookies and set new one
-          res.clearCookie('connect.sid');
-          res.cookie('connect.sid', `s:${req.sessionID}`, {
-            path: '/',
-            maxAge: 24 * 60 * 60 * 1000,
-            httpOnly: false,
-            secure: false,
-            sameSite: 'lax'
-          });
+          // Force browser to accept new session
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
           
-          console.log(`Setting fresh cookie: s:${req.sessionID}`);
+          console.log(`Login successful with session ID: ${req.sessionID}`);
           
           res.json({ 
             user: { id: user.id, name: user.name, phone: user.phone, district: user.district },
-            sessionId: req.sessionID // Debug info
+            sessionId: req.sessionID,
+            message: "Login successful, reload page" // Signal to reload
           });
         }
       });
