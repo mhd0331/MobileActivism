@@ -145,11 +145,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const authorId = req.session.userId!;
       const policyData = { ...req.body, authorId };
+      console.log("Policy creation attempt:", { authorId, body: req.body });
+      
       const validatedData = insertPolicySchema.parse(policyData);
+      console.log("Validated policy data:", validatedData);
       
       const policy = await storage.createPolicy(validatedData);
+      console.log("Policy created successfully:", policy);
       res.json({ policy });
     } catch (error) {
+      console.error("Policy creation error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid policy data", errors: error.errors });
       }

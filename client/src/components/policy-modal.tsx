@@ -56,11 +56,12 @@ export default function PolicyModal({ open, onOpenChange }: PolicyModalProps) {
         title: "정책 제안 완료",
         description: "정책 제안이 성공적으로 등록되었습니다!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/policies"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/policies/all"] });
       resetForm();
       onOpenChange(false);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Policy creation error:", error);
       toast({
         title: "잠시만요",
         description: "정책 제안이 저장되지 않았습니다. 인터넷 연결을 확인하고 다시 시도해주세요.",
