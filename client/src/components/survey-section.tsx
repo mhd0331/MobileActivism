@@ -188,6 +188,7 @@ export default function SurveySection() {
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
     if (pendingSubmission) {
+      setPendingSubmission(false);
       // Retry submission after successful login
       setTimeout(() => {
         handleSubmit();

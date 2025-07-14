@@ -20,7 +20,7 @@ export interface LoginData {
 
 export function useAuth() {
   return useQuery<AuthResponse | null>({
-    queryKey: ["/api/auth/me"],
+    queryKey: ["/api/me"],
     retry: false,
   });
 }
@@ -30,11 +30,14 @@ export function useLogin() {
   
   return useMutation({
     mutationFn: async (data: LoginData) => {
-      const response = await apiRequest("POST", "/api/auth/login", data);
-      return response.json();
+      const response = await apiRequest("/api/login", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
     },
   });
 }
@@ -44,11 +47,13 @@ export function useLogout() {
   
   return useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/auth/logout");
-      return response.json();
+      const response = await apiRequest("/api/logout", {
+        method: "POST",
+      });
+      return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
     },
   });
 }
