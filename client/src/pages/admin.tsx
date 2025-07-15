@@ -852,19 +852,51 @@ export default function AdminPage() {
                     <BarChart3 className="h-5 w-5" />
                     여론조사 관리
                   </div>
-                  <Button
-                    onClick={() => initializeSurveyContentMutation.mutate()}
-                    disabled={initializeSurveyContentMutation.isPending}
-                    size="sm"
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${initializeSurveyContentMutation.isPending ? 'animate-spin' : ''}`} />
-                    여론조사 콘텐츠 초기화
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch("/api/admin/initialize-survey", {
+                            method: "POST",
+                            credentials: "include",
+                          });
+                          if (response.ok) {
+                            toast({
+                              title: "성공",
+                              description: "설문 질문이 초기화되었습니다 (8개 질문).",
+                            });
+                          } else {
+                            throw new Error("초기화 실패");
+                          }
+                        } catch (error) {
+                          toast({
+                            title: "오류",
+                            description: "설문 초기화에 실패했습니다.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      size="sm"
+                      variant="default"
+                      className="flex items-center gap-2"
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      설문 질문 초기화
+                    </Button>
+                    <Button
+                      onClick={() => initializeSurveyContentMutation.mutate()}
+                      disabled={initializeSurveyContentMutation.isPending}
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${initializeSurveyContentMutation.isPending ? 'animate-spin' : ''}`} />
+                      텍스트 콘텐츠 초기화
+                    </Button>
+                  </div>
                 </CardTitle>
                 <CardDescription>
-                  여론조사 섹션의 텍스트 콘텐츠를 관리합니다. 실제 설문 질문은 별도 시스템에서 관리됩니다.
+                  여론조사 관련 콘텐츠를 관리합니다. "설문 질문 초기화"는 8개 질문으로 설문을 새로 생성하고, "텍스트 콘텐츠 초기화"는 페이지 텍스트를 업데이트합니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -902,7 +934,7 @@ export default function AdminPage() {
                         <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                         <p className="mb-4">여론조사 콘텐츠가 없습니다.</p>
                         <p className="text-sm text-gray-400">
-                          "여론조사 콘텐츠 초기화" 버튼을 눌러 기본 콘텐츠를 생성하세요.
+                          "텍스트 콘텐츠 초기화" 버튼을 눌러 기본 텍스트를 생성하세요.
                         </p>
                       </div>
                     )}

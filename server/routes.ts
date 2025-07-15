@@ -9,6 +9,7 @@ import { insertUserSchema, insertPolicySchema, insertSignatureSchema, insertAdmi
 import { z } from "zod";
 import { initializeWebContent } from "./initializeWebContent";
 import { initializeSurvey } from "./initializeSurvey";
+import { initializeSurveyContent } from "./initializeSurveyContent";
 
 declare module 'express-session' {
   interface SessionData {
@@ -729,6 +730,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to initialize survey:", error);
       res.status(500).json({ message: "Failed to initialize survey" });
+    }
+  });
+
+  // Survey Content Initialization (Admin only)
+  app.post("/api/admin/initialize-survey-content", requireAdminAuth, async (req, res) => {
+    try {
+      await initializeSurveyContent();
+      res.json({ message: "Survey content initialized successfully" });
+    } catch (error) {
+      console.error("Failed to initialize survey content:", error);
+      res.status(500).json({ message: "Failed to initialize survey content" });
     }
   });
 

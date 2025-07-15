@@ -189,3 +189,11 @@ Core entities include:
 - **Service Worker Registration**: Enhanced service worker with comprehensive caching and background sync
 - **Progressive Enhancement**: Install banner shows for 5 seconds, dismissible, with manual install instructions
 - **App Icon System**: Created SVG-based app icons with proper manifest.json configuration for all device sizes
+
+### Survey Content Update to Original Reference Material (July 15, 2025)
+- **8-Question Survey System**: Reduced from 12 to 8 questions based on provided reference document
+- **Elder-Friendly Language**: Changed "앱/웹" to "휴대폰이나 컴퓨터" throughout all survey questions
+- **Multiple Choice Explanations**: Added "(여러 개 선택 가능)" helper text for multiple choice questions
+- **No Essay Questions**: Removed all text input questions to focus on multiple choice format
+- **CMS Survey Content Management**: Added survey content initialization and management in admin panel
+- **Database-Driven Survey Text**: All survey UI text now stored in database and editable via CMS
