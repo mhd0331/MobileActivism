@@ -70,11 +70,11 @@ export function PWAInstallBanner({ onClose }: PWAInstallBannerProps) {
     
     let message = '';
     if (isIOS) {
-      message = '아이폰: Safari 브라우저에서 하단 공유 버튼을 누르고 "홈 화면에 추가"를 선택하세요.';
+      message = '📱 아이폰 사용자 앱 설치 방법:\n\n1. Safari 브라우저로 이 페이지를 열어주세요\n2. 화면 하단 공유 버튼(📤)을 누르세요\n3. "홈 화면에 추가"를 선택하세요\n4. "추가"를 눌러 설치를 완료하세요\n\n📍 설치 후 홈 화면에서 바로 진안군 캠페인에 참여할 수 있습니다!';
     } else if (isAndroid) {
-      message = '안드로이드: Chrome 브라우저에서 메뉴(⋮)를 누르고 "홈 화면에 추가"를 선택하세요.';
+      message = '📱 안드로이드 사용자 앱 설치 방법:\n\n1. Chrome 브라우저로 이 페이지를 열어주세요\n2. 우상단 메뉴(⋮)를 누르세요\n3. "홈 화면에 추가" 또는 "앱 설치"를 선택하세요\n4. "설치"를 눌러 완료하세요\n\n📍 설치 후 홈 화면에서 바로 진안군 캠페인에 참여할 수 있습니다!';
     } else {
-      message = '브라우저 메뉴에서 "홈 화면에 추가" 또는 "앱 설치"를 선택하세요.';
+      message = '📱 앱 설치 방법:\n\n1. 브라우저 메뉴를 열어주세요\n2. "홈 화면에 추가" 또는 "앱 설치"를 선택하세요\n3. 설치를 완료하세요\n\n📍 설치 후 홈 화면에서 바로 진안군 캠페인에 참여할 수 있습니다!';
     }
     
     alert(message);
@@ -99,10 +99,10 @@ export function PWAInstallBanner({ onClose }: PWAInstallBannerProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-medium">
-                  📱 앱으로 더 편리하게!
+                  📱 진안군 캠페인 앱 설치
                 </h3>
                 <p className="text-xs text-blue-100 mt-1">
-                  홈 화면에 추가하여 빠른 접근과 알림을 받으세요
+                  홈 화면에 추가하여 서명 참여와 최신 소식을 빠르게 확인하세요
                 </p>
               </div>
             </div>

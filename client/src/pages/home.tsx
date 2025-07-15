@@ -11,6 +11,7 @@ import ResourcesSection from "@/components/resources-section";
 import DashboardSection from "@/components/dashboard-section";
 import Footer from "@/components/footer";
 import FloatingSignatureButton from "@/components/floating-signature-button";
+import { PWAInstallGuide } from "@/components/pwa-install-guide";
 
 export default function Home() {
   const [currentSection, setCurrentSection] = useState("notices");
@@ -40,6 +41,8 @@ export default function Home() {
         return <ResourcesSection />;
       case "dashboard":
         return <DashboardSection />;
+      case "app":
+        return <PWAInstallGuide />;
       default:
         return <NoticesSection />;
     }

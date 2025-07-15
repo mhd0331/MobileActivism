@@ -197,3 +197,10 @@ Core entities include:
 - **No Essay Questions**: Removed all text input questions to focus on multiple choice format
 - **CMS Survey Content Management**: Added survey content initialization and management in admin panel
 - **Database-Driven Survey Text**: All survey UI text now stored in database and editable via CMS
+
+### PWA Install Guide Enhancement (July 15, 2025)
+- **Comprehensive Install Guide**: Added detailed PWA installation section with step-by-step instructions for iOS and Android
+- **Platform-Specific Instructions**: Separate installation guides for iPhone (Safari) and Android (Chrome) with visual indicators
+- **Benefits Explanation**: Clear explanation of PWA benefits including offline access, faster loading, and home screen shortcuts
+- **Enhanced Banner Messages**: Improved PWA install banner with campaign-specific messaging and better user guidance
+- **Navigation Integration**: Added "앱 설치" tab to main navigation for easy access to installation guide
