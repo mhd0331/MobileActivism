@@ -11,7 +11,7 @@ export default function MotivationSection() {
   // 민주주의 위기 카드 콘텐츠
   const democracyCrisisTitle = useContentText("motivation", "democracy_crisis_title", "민주주의 위기");
   const democracyCrisisSubtitle = useContentText("motivation", "democracy_crisis_subtitle", "🚨 이것은 민주주의입니까?");
-  const democracyPoint1Title = useContentText("motivation", "democracy_point1_title", "의회 정상 기능");
+  const democracyPoint1Title = useContentText("motivation", "democracy_point1_title", "의회 문제점 지적, 반대");
   const democracyPoint1Content = useContentText("motivation", "democracy_point1_content", "군민 대표의 정당한 심의 결과");
   const democracyPoint2Title = useContentText("motivation", "democracy_point2_title", "군수, 독단 강행");
   const democracyPoint2Content = useContentText("motivation", "democracy_point2_content", "의회의 반대 의견을 무릅쓰고 집행부 pool 예산을 사용하여 사업 강행\n지방자치법 제 55조를 위반하여 안건을 군의회에 사전 제출하지 않음");
