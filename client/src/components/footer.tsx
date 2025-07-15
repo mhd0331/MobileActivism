@@ -8,16 +8,16 @@ export default function Footer() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   
   // Get content from database
-  const siteTitle = useContentText("header", "site_title", "진안군 목조전망대 반대 캠페인");
+  const campaignTitle = useContentText("footer", "campaign_title", "진안군 목조전망대 건설 반대 시민모임");
   const siteDescription = useContentText("footer", "site_description", "군민의 소중한 세금을 지키고\n민주적 절차를 존중하는\n건전한 지방자치를 만들어갑니다.");
   const contactTitle = useContentText("footer", "contact_title", "연락처");
-  const contactEmail = useContentText("footer", "contact_email", "campaign@jinan.org");
-  const contactPhone = useContentText("footer", "contact_phone", "063-000-0000");
-  const contactAddress = useContentText("footer", "contact_address", "전북 진안군 진안읍");
+  const contactEmail = useContentText("footer", "contact_email", "mhd0331@gmail.com");
+  const contactPhone = useContentText("footer", "contact_phone", "010-4992-5534");
+  const contactAddress = useContentText("footer", "contact_address", "전북 진안군 진안읍 진무로 1083-1");
   const infoTitle = useContentText("footer", "info_title", "정보");
   const privacyInfo = useContentText("footer", "privacy_info", "• 수집된 정보는 캠페인 목적으로만 사용\n• SSL 암호화로 안전하게 보관\n• 제3자 제공 금지\n• 캠페인 종료 후 즉시 삭제");
   const adminLogin = useContentText("footer", "admin_login", "관리자 로그인");
-  const copyright = useContentText("footer", "copyright", "© 2024 진안군 목조전망대 반대 캠페인. 모든 권리 보유.");
+  const copyright = useContentText("footer", "copyright", "© 2024 진안군 목조전망대 건설 반대 시민모임. All rights reserved.");
   const purpose = useContentText("footer", "purpose", "이 앱은 민주적 참여를 위한 비영리 목적으로 제작되었습니다.");
 
   return (
@@ -25,7 +25,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h4 className="text-lg font-semibold mb-4">{siteTitle}</h4>
+            <h4 className="text-lg font-semibold mb-4">{campaignTitle}</h4>
             <div className="text-gray-300 text-sm">
               {siteDescription.split('\n').map((line, idx) => (
                 <span key={idx}>
