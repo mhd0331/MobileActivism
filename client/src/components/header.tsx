@@ -1,14 +1,16 @@
 import { useAuth, useLogout } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Mountain, UserCircle } from "lucide-react";
+import { Mountain, UserCircle, Download, Smartphone } from "lucide-react";
 import AuthModal from "./auth-modal";
 import { useState } from "react";
 import { useContentText } from "@/hooks/useWebContent";
+import { usePWA } from "@/hooks/usePWA";
 
 export default function Header() {
   const { data: auth, isLoading } = useAuth();
   const logout = useLogout();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const { canInstall, isInstalled, install } = usePWA();
 
   // Debug logging for auth state
   console.log("Header auth state:", { auth, isLoading });
@@ -34,11 +36,44 @@ export default function Header() {
               </h1>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* PWA Install Button */}
+              {canInstall && !isInstalled && (
+                <Button
+                  onClick={install}
+                  variant="outline"
+                  size="sm"
+                  className="hidden sm:flex items-center space-x-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>앱 설치</span>
+                </Button>
+              )}
+              
+              {/* Mobile PWA Button */}
+              {canInstall && !isInstalled && (
+                <Button
+                  onClick={install}
+                  variant="outline"
+                  size="sm"
+                  className="flex sm:hidden bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                >
+                  <Smartphone className="h-4 w-4" />
+                </Button>
+              )}
+              
+              {/* Installed indicator */}
+              {isInstalled && (
+                <div className="flex items-center space-x-1 text-green-600 text-sm">
+                  <Smartphone className="h-4 w-4" />
+                  <span className="hidden sm:inline">앱 설치됨</span>
+                </div>
+              )}
+
               {auth && (
                 <div className="flex items-center space-x-2">
                   <UserCircle className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-medium">{auth.user?.name || "사용자"}</span>
+                  <span className="text-sm font-medium hidden sm:inline">{auth.user?.name || "사용자"}</span>
                 </div>
               )}
               

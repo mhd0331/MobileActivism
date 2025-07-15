@@ -2,8 +2,10 @@ const CACHE_NAME = 'jinan-campaign-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  '/icon-192x192.svg',
+  '/icon-256x256.svg',
+  '/icon-384x384.svg',
+  '/icon-512x512.svg',
   'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap'
 ];
 
@@ -157,8 +159,8 @@ self.addEventListener('push', (event) => {
     
     const options = {
       body: data.body || '새로운 캠페인 업데이트가 있습니다.',
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
+      icon: '/icon-192x192.svg',
+      badge: '/icon-192x192.svg',
       tag: 'campaign-update',
       renotify: true,
       requireInteraction: false,
@@ -166,7 +168,7 @@ self.addEventListener('push', (event) => {
         {
           action: 'view',
           title: '보기',
-          icon: '/icon-192x192.png'
+          icon: '/icon-192x192.svg'
         },
         {
           action: 'close',
